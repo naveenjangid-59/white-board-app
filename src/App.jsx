@@ -1,9 +1,12 @@
 import React from "react";
+import Board from "./components/Board/Board";
+import Toolbar from "./components/Toolbar/Toolbar";
 
 const App = () => {
   return (
     <div>
-      <h1>App</h1>
+      <Board />
+      <Toolbar />
     </div>
   );
 };

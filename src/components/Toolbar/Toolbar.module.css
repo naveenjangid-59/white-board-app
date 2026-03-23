@@ -1,0 +1,78 @@
+.toolbarContainer {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: nowrap;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  width: max-content;
+  max-width: calc(100vw - 2rem);
+  border: 1px solid #e2e8f0;
+  border-radius: 0.875rem;
+  background-color: #ffffff;
+  box-shadow:
+    0 1px 2px 0 rgb(15 23 42 / 0.05),
+    0 1px 3px 0 rgb(15 23 42 / 0.1);
+}
+
+.toolItem {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.75rem;
+  padding: 0.625rem 0.875rem;
+  border-radius: 0.75rem;
+  background-color: transparent;
+  color: #334155;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  line-height: 1;
+  cursor: pointer;
+  user-select: none;
+  transition:
+    background-color 150ms ease,
+    color 150ms ease,
+    transform 150ms ease;
+}
+
+.toolItem:hover {
+  background-color: #dbeafe;
+  color: #1d4ed8;
+}
+
+.active {
+  background-color: #dbeafe;
+  color: #1d4ed8;
+}
+
+@media (max-width: 640px) {
+  .toolbarContainer {
+    left: 0.75rem;
+    right: 0.75rem;
+    transform: none;
+    justify-content: flex-start;
+    width: auto;
+    max-width: none;
+    padding: 0.45rem;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .toolbarContainer::-webkit-scrollbar {
+    display: none;
+  }
+
+  .toolItem {
+    flex: 0 0 auto;
+    white-space: nowrap;
+    min-width: 2.5rem;
+    padding: 0.55rem 0.8rem;
+  }
+}
