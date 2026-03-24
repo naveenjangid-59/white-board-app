@@ -5,4 +5,7 @@ const TOOLS = {
   PEN: "pen",
 };
 
-export { TOOLS };
+const BOARD_ACTIONS = {
+  CHANGE_TOOL: "CHANGE_TOOL",
+};
+export { TOOLS, BOARD_ACTIONS };
