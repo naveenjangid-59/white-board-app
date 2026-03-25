@@ -1,5 +1,6 @@
 import { createContext, useReducer } from "react";
 import { TOOLS, BOARD_ACTIONS } from "../Constants.js";
+import { getElement, getLastElement } from "@/utils/Element.js";
 import rough from "roughjs";
 const generator = rough.generator();
 export const BoardContext = createContext({
@@ -14,18 +15,17 @@ export const BoardContext = createContext({
 function boardReducer(state, action) {
   switch (action.type) {
     case BOARD_ACTIONS.CHANGE_TOOL: {
+      console.log("selected item : ", action.payload);
       return { ...state, activeToolItem: action.payload };
     }
     case BOARD_ACTIONS.DRAW_DOWN: {
       const { clientX, clientY } = action.payload;
-      const newElement = {
-        id: state.elements.length,
-        x1: clientX,
-        y1: clientY,
-        x2: clientX,
-        y2: clientY,
-        roughElement: generator.line(clientX, clientY, clientX, clientY),
-      };
+      const id = state.elements.length;
+      const x1 = clientX;
+      const y1 = clientY;
+      const x2 = clientX;
+      const y2 = clientY;
+      const newElement = getElement(id, x1, y1, x2, y2, state.activeToolItem);
       console.log("MOUSE_DOWN", newElement);
       return {
         ...state,
@@ -38,16 +38,15 @@ function boardReducer(state, action) {
       const elementsCopy = [...state.elements];
       const lastIndex = elementsCopy.length - 1;
       const lastEl = { ...elementsCopy[lastIndex] };
-      lastEl.x2 = clientX;
-      lastEl.y2 = clientY;
-      lastEl.roughElement = generator.line(
-        lastEl.x1,
-        lastEl.y1,
-        lastEl.x2,
-        lastEl.y2,
+      const newLastEl = getLastElement(
+        lastEl,
+        clientX,
+        clientY,
+        state.activeToolItem,
       );
-      elementsCopy[lastIndex] = lastEl;
-      console.log("MOUSE_MOVE", lastEl);
+
+      elementsCopy[lastIndex] = newLastEl;
+      console.log("MOUSE_MOVE", newLastEl);
       return { ...state, elements: elementsCopy };
     }
     case BOARD_ACTIONS.DRAW_UP: {
