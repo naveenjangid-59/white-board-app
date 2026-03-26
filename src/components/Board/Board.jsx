@@ -36,9 +36,10 @@ const Board = () => {
     <div>
       <canvas
         ref={boardCanvasRef}
-        onMouseDown={boardMouseDownHandler}
-        onMouseMove={boardMouseMoveHandler}
-        onMouseUp={boardMouseUpHandler}
+        style={{ touchAction: "none" }}
+        onPointerDown={boardMouseDownHandler}
+        onPointerMove={boardMouseMoveHandler}
+        onPointerUp={boardMouseUpHandler}
       ></canvas>
     </div>
   );

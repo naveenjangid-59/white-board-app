@@ -3,6 +3,7 @@ const TOOLS = {
   CIRCLE: "circle",
   LINE: "line",
   PEN: "pen",
+  ARROW: "arrow",
 };
 
 const BOARD_ACTIONS = {
@@ -12,4 +13,6 @@ const BOARD_ACTIONS = {
   DRAW_UP: "DRAW_UP",
 };
 
-export { TOOLS, BOARD_ACTIONS };
+const ARROW_LENGTH = 20;
+
+export { TOOLS, BOARD_ACTIONS, ARROW_LENGTH };

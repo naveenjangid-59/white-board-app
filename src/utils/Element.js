@@ -1,5 +1,6 @@
 import rough from "roughjs";
-import { TOOLS } from "../Constants.js";
+import { TOOLS, ARROW_LENGTH } from "../Constants.js";
+import { getArrowHeadsCoordinates, getDrawablePoints } from "./Math.js";
 const generator = rough.generator();
 
 function getElement(id, x1, y1, x2, y2, activeToolItem) {
@@ -35,6 +36,18 @@ function getElement(id, x1, y1, x2, y2, activeToolItem) {
         y2 - y1,
         options,
       );
+      break;
+    case TOOLS.ARROW:
+      let { x3, y3, x4, y4 } = getArrowHeadsCoordinates(
+        x1,
+        x2,
+        y1,
+        y1,
+        ARROW_LENGTH,
+      );
+      const points = getDrawablePoints(x1, y1, x2, y2, x3, y3, x4, y4);
+
+      newElement.roughElement = generator.linearPath(points, options);
       break;
     default:
       newElement.roughElement = generator.line(x1, y1, x2, y2, options);
@@ -81,6 +94,19 @@ function getLastElement(lastElement, x2, y2, activeToolItem) {
         ele.y2 - ele.y1,
         options,
       );
+      break;
+    case TOOLS.ARROW:
+      ele.x2 = x2;
+      ele.y2 = y2;
+      let { x3, y3, x4, y4 } = getArrowHeadsCoordinates(
+        ele.x1,
+        x2,
+        ele.y1,
+        y2,
+        ARROW_LENGTH,
+      );
+      const points = getDrawablePoints(ele.x1, ele.y1, x2, y2, x3, y3, x4, y4);
+      ele.roughElement = generator.linearPath(points, options);
       break;
     default:
       break;

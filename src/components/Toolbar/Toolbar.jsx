@@ -2,15 +2,26 @@ import React from "react";
 import cx from "classnames";
 import styles from "./Toolbar.module.css";
 import { TOOLS } from "../../Constants";
-import { LuRectangleHorizontal } from "react-icons/lu";
+import { RiRectangleLine } from "react-icons/ri";
 import { FaRegCircle, FaSlash, FaPen } from "react-icons/fa";
 import { useContext } from "react";
 import { BoardContext } from "@/store/boardContext";
+import { FaArrowRightLong } from "react-icons/fa6";
 
 const Toolbar = () => {
   const { activeToolItem, handleToolItemChange } = useContext(BoardContext);
   return (
     <div className={styles.toolbarContainer}>
+      <div
+        className={cx(styles.toolItem, {
+          [styles.active]: activeToolItem === TOOLS.LINE,
+        })}
+        onClick={() => {
+          handleToolItemChange(TOOLS.LINE);
+        }}
+      >
+        <FaSlash />
+      </div>
       <div
         className={cx(styles.toolItem, {
           [styles.active]: activeToolItem === TOOLS.RECTANGLE,
@@ -19,7 +30,7 @@ const Toolbar = () => {
           handleToolItemChange(TOOLS.RECTANGLE);
         }}
       >
-        <LuRectangleHorizontal />
+        <RiRectangleLine />
       </div>
       <div
         className={cx(styles.toolItem, {
@@ -31,15 +42,16 @@ const Toolbar = () => {
       >
         <FaRegCircle />
       </div>
+
       <div
         className={cx(styles.toolItem, {
-          [styles.active]: activeToolItem === TOOLS.LINE,
+          [styles.active]: activeToolItem === TOOLS.ARROW,
         })}
         onClick={() => {
-          handleToolItemChange(TOOLS.LINE);
+          handleToolItemChange(TOOLS.ARROW);
         }}
       >
-        <FaSlash />
+        <FaArrowRightLong />
       </div>
       <div
         className={cx(styles.toolItem, {
