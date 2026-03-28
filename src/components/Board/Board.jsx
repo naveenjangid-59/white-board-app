@@ -1,5 +1,5 @@
 import React, { useContext, useLayoutEffect } from "react";
-import { BoardContext } from "@/store/boardContext";
+import { BoardContext } from "@/store/BoardContext";
 import rough from "roughjs";
 
 const Board = () => {
@@ -36,7 +36,11 @@ const Board = () => {
     <div>
       <canvas
         ref={boardCanvasRef}
-        style={{ touchAction: "none" }}
+        style={{
+          touchAction: "none",
+          background: "white",
+          display: "block",
+        }}
         onPointerDown={boardMouseDownHandler}
         onPointerMove={boardMouseMoveHandler}
         onPointerUp={boardMouseUpHandler}

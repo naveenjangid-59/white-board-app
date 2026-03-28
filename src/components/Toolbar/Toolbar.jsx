@@ -5,7 +5,7 @@ import { TOOLS } from "../../Constants";
 import { RiRectangleLine } from "react-icons/ri";
 import { FaRegCircle, FaSlash, FaPen } from "react-icons/fa";
 import { useContext } from "react";
-import { BoardContext } from "@/store/boardContext";
+import { BoardContext } from "@/store/BoardContext";
 import { FaArrowRightLong } from "react-icons/fa6";
 
 const Toolbar = () => {

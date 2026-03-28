@@ -3,17 +3,20 @@ import { TOOLS, ARROW_LENGTH } from "../Constants.js";
 import { getArrowHeadsCoordinates, getDrawablePoints } from "./Math.js";
 const generator = rough.generator();
 
-function getElement(id, x1, y1, x2, y2, activeToolItem) {
+function getElement(id, x1, y1, x2, y2, { activeToolItem, stroke, fill }) {
+  let options = {
+    seed: id + 1,
+    stroke: stroke,
+  };
   const newElement = {
     id,
     x1,
     y1,
     x2,
     y2,
+    options,
   };
-  let options = {
-    seed: id + 1,
-  };
+
   switch (activeToolItem) {
     case TOOLS.LINE:
       console.log("down inside line");
@@ -56,11 +59,9 @@ function getElement(id, x1, y1, x2, y2, activeToolItem) {
   return newElement;
 }
 
-function getLastElement(lastElement, x2, y2, activeToolItem) {
+function getLastElement(lastElement, x2, y2, { activeToolItem }) {
   const ele = { ...lastElement };
-  let options = {
-    seed: ele.id + 1,
-  };
+
   switch (activeToolItem) {
     case TOOLS.LINE:
       ele.x2 = x2;
@@ -70,7 +71,7 @@ function getLastElement(lastElement, x2, y2, activeToolItem) {
         ele.y1,
         ele.x2,
         ele.y2,
-        options,
+        ele.options,
       );
       break;
     case TOOLS.RECTANGLE:
@@ -81,7 +82,7 @@ function getLastElement(lastElement, x2, y2, activeToolItem) {
         ele.y1,
         ele.x2 - ele.x1,
         ele.y2 - ele.y1,
-        options,
+        ele.options,
       );
       break;
     case TOOLS.CIRCLE:
@@ -92,7 +93,7 @@ function getLastElement(lastElement, x2, y2, activeToolItem) {
         (ele.y1 + ele.y2) / 2,
         ele.x2 - ele.x1,
         ele.y2 - ele.y1,
-        options,
+        ele.options,
       );
       break;
     case TOOLS.ARROW:
@@ -106,7 +107,7 @@ function getLastElement(lastElement, x2, y2, activeToolItem) {
         ARROW_LENGTH,
       );
       const points = getDrawablePoints(ele.x1, ele.y1, x2, y2, x3, y3, x4, y4);
-      ele.roughElement = generator.linearPath(points, options);
+      ele.roughElement = generator.linearPath(points, ele.options);
       break;
     default:
       break;

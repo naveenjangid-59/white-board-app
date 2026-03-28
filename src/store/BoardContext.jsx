@@ -1,6 +1,8 @@
 import { createContext, useReducer } from "react";
 import { TOOLS, BOARD_ACTIONS } from "../Constants.js";
 import { getElement, getLastElement } from "@/utils/Element.js";
+import { ToolboxContext } from "./ToolboxContext.jsx";
+import { useContext } from "react";
 import rough from "roughjs";
 const generator = rough.generator();
 export const BoardContext = createContext({
@@ -19,13 +21,18 @@ function boardReducer(state, action) {
       return { ...state, activeToolItem: action.payload };
     }
     case BOARD_ACTIONS.DRAW_DOWN: {
-      const { clientX, clientY } = action.payload;
+      console.log("insider reducer");
+      const { clientX, clientY, stroke } = action.payload;
       const id = state.elements.length;
       const x1 = clientX;
       const y1 = clientY;
       const x2 = clientX;
       const y2 = clientY;
-      const newElement = getElement(id, x1, y1, x2, y2, state.activeToolItem);
+
+      const newElement = getElement(id, x1, y1, x2, y2, {
+        activeToolItem: state.activeToolItem,
+        stroke,
+      });
       console.log("MOUSE_DOWN", newElement);
       return {
         ...state,
@@ -34,16 +41,14 @@ function boardReducer(state, action) {
       };
     }
     case BOARD_ACTIONS.DRAW_MOVE: {
+      if (!state.isDown || state.elements.length === 0) return state;
       const { clientX, clientY } = action.payload;
       const elementsCopy = [...state.elements];
       const lastIndex = elementsCopy.length - 1;
       const lastEl = { ...elementsCopy[lastIndex] };
-      const newLastEl = getLastElement(
-        lastEl,
-        clientX,
-        clientY,
-        state.activeToolItem,
-      );
+      const newLastEl = getLastElement(lastEl, clientX, clientY, {
+        activeToolItem: state.activeToolItem,
+      });
 
       elementsCopy[lastIndex] = newLastEl;
       console.log("MOUSE_MOVE", newLastEl);
@@ -63,24 +68,27 @@ const initialBoardState = {
   elements: [],
   isDown: false,
 };
+
 function BoardContextProvider({ children }) {
   const [state, dispatchBoardAction] = useReducer(
     boardReducer,
     initialBoardState,
   );
-
+  const { toolboxState } = useContext(ToolboxContext);
   const handleToolItemChange = (toolItem) => {
     dispatchBoardAction({ type: BOARD_ACTIONS.CHANGE_TOOL, payload: toolItem });
   };
 
   const boardMouseDownHandler = (event) => {
+    console.log(1);
     if (event.pointerType === "mouse" && event.buttons !== 1) return;
-
+    console.log(2);
     dispatchBoardAction({
       type: BOARD_ACTIONS.DRAW_DOWN,
       payload: {
         clientX: event.clientX,
         clientY: event.clientY,
+        stroke: toolboxState[state.activeToolItem].stroke,
       },
     });
   };
@@ -92,6 +100,7 @@ function BoardContextProvider({ children }) {
       payload: {
         clientX: event.clientX,
         clientY: event.clientY,
+        stroke: toolboxState[state.activeToolItem].stroke,
       },
     });
   };

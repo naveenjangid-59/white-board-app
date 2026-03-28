@@ -1,0 +1,65 @@
+.toolbox {
+  position: fixed;
+  left: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 200px;
+
+  background: #f0efef; /* VS Code-like */
+  backdrop-filter: blur(10px);
+
+  padding: 18px;
+  border-radius: 14px;
+
+  /* box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5); */
+  border: 1px solid rgba(255, 255, 255, 0.06);
+
+  color: #e6e6e6;
+}
+
+.section {
+  margin-bottom: 22px;
+}
+
+.title {
+  font-size: 13px;
+  margin-bottom: 10px;
+  font-weight: 500;
+  color: #050505;
+  letter-spacing: 0.5px;
+}
+
+.colorContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.colorBox {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  cursor: pointer;
+
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  transition: all 0.2s ease;
+}
+
+.colorBox:hover {
+  transform: scale(1.15);
+  border-color: white;
+}
+
+.active {
+  transform: scale(1.2);
+  border: 2px solid #4cc2ff;
+  box-shadow: 0 0 10px rgba(76, 194, 255, 0.6);
+}
+
+.slider {
+  margin-top: 8px;
+  height: 6px;
+  background: #333;
+  border-radius: 4px;
+  position: relative;
+}

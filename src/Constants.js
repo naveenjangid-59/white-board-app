@@ -1,9 +1,9 @@
 const TOOLS = {
-  RECTANGLE: "rectangle",
-  CIRCLE: "circle",
-  LINE: "line",
-  PEN: "pen",
-  ARROW: "arrow",
+  RECTANGLE: "RECTANGLE",
+  CIRCLE: "CIRCLE",
+  LINE: "LINE",
+  PEN: "PEN",
+  ARROW: "ARROW",
 };
 
 const BOARD_ACTIONS = {
@@ -15,4 +15,19 @@ const BOARD_ACTIONS = {
 
 const ARROW_LENGTH = 20;
 
-export { TOOLS, BOARD_ACTIONS, ARROW_LENGTH };
+const COLORS = {
+  BLACK: "#000000",
+  RED: "#ff0000",
+  GREEN: "#00ff00",
+  BLUE: "#0000ff",
+  ORANGE: "#ffa500",
+  YELLOW: "#ffff00",
+  WHITE: "#ffffff",
+};
+const TOOLBOX_ACTIONS = {
+  CHANGE_STROKE: "CHANGE_STROKE",
+  CHANGE_FILL: "CHANGE_FILL",
+  CHANGE_SIZE: "CHANGE_SIZE",
+};
+
+export { TOOLS, BOARD_ACTIONS, ARROW_LENGTH, COLORS, TOOLBOX_ACTIONS };
