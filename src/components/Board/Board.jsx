@@ -1,6 +1,7 @@
 import React, { useContext, useLayoutEffect } from "react";
 import { BoardContext } from "@/store/BoardContext";
 import rough from "roughjs";
+import { TOOLS } from "@/Constants";
 
 const Board = () => {
   const boardCanvasRef = React.useRef();
@@ -28,7 +29,20 @@ const Board = () => {
 
     const roughCanvas = rough.canvas(canvas);
     elements.forEach((element) => {
-      roughCanvas.draw(element.roughElement);
+      switch (element.type) {
+        case TOOLS.LINE:
+        case TOOLS.RECTANGLE:
+        case TOOLS.CIRCLE:
+        case TOOLS.ARROW:
+          roughCanvas.draw(element.roughElement);
+          break;
+        case TOOLS.PEN:
+          ctx.fillStyle = element.stroke;
+          ctx.fill(element.path);
+          break;
+        default:
+          break;
+      }
     });
   }, [elements]);
 

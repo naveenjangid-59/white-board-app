@@ -53,7 +53,7 @@ function boardReducer(state, action) {
       });
 
       elementsCopy[lastIndex] = newLastEl;
-      console.log("MOUSE_MOVE", newLastEl);
+      // console.log("MOUSE_MOVE", newLastEl);
       return { ...state, elements: elementsCopy };
     }
     case BOARD_ACTIONS.DRAW_UP: {

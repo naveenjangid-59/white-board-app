@@ -2,7 +2,8 @@ import rough from "roughjs";
 import { TOOLS, ARROW_LENGTH } from "../Constants.js";
 import { getArrowHeadsCoordinates, getDrawablePoints } from "./Math.js";
 const generator = rough.generator();
-
+import { getSvgPathFromStroke } from "./svgPathFromStroke.js";
+import { getStroke } from "perfect-freehand";
 function getElement(
   id,
   x1,
@@ -23,10 +24,21 @@ function getElement(
     y1,
     x2,
     y2,
+    type: activeToolItem,
     options,
   };
 
   switch (activeToolItem) {
+    case TOOLS.PEN: {
+      const penElement = {
+        id,
+        points: [{ x: x1, y: y1 }],
+        type: activeToolItem,
+        path: new Path2D(getSvgPathFromStroke(getStroke([{ x: x1, y: y1 }]))),
+        stroke,
+      };
+      return penElement;
+    }
     case TOOLS.LINE:
       console.log("down inside line");
       newElement.roughElement = generator.line(x1, y1, x2, y2, options);
@@ -72,6 +84,11 @@ function getLastElement(lastElement, x2, y2, { activeToolItem }) {
   const ele = { ...lastElement };
 
   switch (activeToolItem) {
+    case TOOLS.PEN: {
+      ele.points = [...ele.points, { x: x2, y: y2 }];
+      ele.path = new Path2D(getSvgPathFromStroke(getStroke(ele.points)));
+      break;
+    }
     case TOOLS.LINE:
       ele.x2 = x2;
       ele.y2 = y2;

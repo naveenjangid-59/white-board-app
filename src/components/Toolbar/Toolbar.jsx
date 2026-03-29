@@ -14,6 +14,16 @@ const Toolbar = () => {
     <div className={styles.toolbarContainer}>
       <div
         className={cx(styles.toolItem, {
+          [styles.active]: activeToolItem === TOOLS.PEN,
+        })}
+        onClick={() => {
+          handleToolItemChange(TOOLS.PEN);
+        }}
+      >
+        <FaPen />
+      </div>
+      <div
+        className={cx(styles.toolItem, {
           [styles.active]: activeToolItem === TOOLS.LINE,
         })}
         onClick={() => {
@@ -52,16 +62,6 @@ const Toolbar = () => {
         }}
       >
         <FaArrowRightLong />
-      </div>
-      <div
-        className={cx(styles.toolItem, {
-          [styles.active]: activeToolItem === TOOLS.PEN,
-        })}
-        onClick={() => {
-          handleToolItemChange(TOOLS.PEN);
-        }}
-      >
-        <FaPen />
       </div>
     </div>
   );
