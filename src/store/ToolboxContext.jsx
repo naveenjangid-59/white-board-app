@@ -7,6 +7,7 @@ const ToolboxContext = createContext();
 const initialToolboxState = {
   [TOOLS.PEN]: {
     stroke: COLORS.BLACK,
+    size: 1,
   },
   [TOOLS.LINE]: {
     stroke: COLORS.BLACK,
@@ -14,12 +15,12 @@ const initialToolboxState = {
   },
   [TOOLS.RECTANGLE]: {
     stroke: COLORS.BLACK,
-    fill: null,
+    fill: "",
     size: 1,
   },
   [TOOLS.CIRCLE]: {
     stroke: COLORS.BLACK,
-    fill: null,
+    fill: "",
     size: 1,
   },
   [TOOLS.ARROW]: {
@@ -54,6 +55,16 @@ function toolboxReducer(state, action) {
         },
       };
     }
+    case TOOLBOX_ACTIONS.CHANGE_SIZE: {
+      const { tool, newSize } = action.payload;
+      return {
+        ...state,
+        [tool]: {
+          ...state[tool],
+          size: newSize,
+        },
+      };
+    }
     default:
       return state;
   }
@@ -79,10 +90,18 @@ const ToolboxContextProvider = ({ children }) => {
     });
   };
 
+  const chageStrokeSizeHandler = (activeToolItem, newSize) => {
+    dispatchToolBoxAction({
+      type: TOOLBOX_ACTIONS.CHANGE_SIZE,
+      payload: { tool: activeToolItem, newSize: newSize },
+    });
+  };
+
   const contextValue = {
     toolboxState,
     changeFillColorHandler,
     changeStrokeColorHandler,
+    chageStrokeSizeHandler,
   };
 
   return (

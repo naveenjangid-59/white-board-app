@@ -4,17 +4,31 @@ import { COLORS } from "@/Constants";
 import cx from "classnames";
 import { BoardContext } from "@/store/BoardContext";
 import { ToolboxContext } from "@/store/ToolboxContext";
+import { GiCrossMark } from "react-icons/gi";
+import { RxCross2 } from "react-icons/rx";
+import { FILL_ITEMS } from "@/Constants";
 
 const Toolbox = () => {
   const { activeToolItem } = useContext(BoardContext);
-  const { toolboxState, changeStrokeColorHandler, changeFillColorHandler } =
-    useContext(ToolboxContext);
+  const {
+    toolboxState,
+    changeStrokeColorHandler,
+    changeFillColorHandler,
+    chageStrokeSizeHandler,
+  } = useContext(ToolboxContext);
   return (
     <div className={styles.toolbox}>
       <div className={styles.section}>
         <div className={styles.title}>Stroke Color</div>
         <div className={styles.colorContainer}>
+          <div
+            className={cx(styles.colorBox, styles.activePreview)}
+            style={{
+              backgroundColor: toolboxState[activeToolItem]?.stroke,
+            }}
+          />
           {Object.keys(COLORS).map((key) => {
+            if (COLORS[key] === "") return;
             return (
               <div
                 key={key}
@@ -32,30 +46,54 @@ const Toolbox = () => {
         </div>
       </div>
 
-      <div className={styles.section}>
-        <div className={styles.title}>Fill Color</div>
-        <div className={styles.colorContainer}>
-          {Object.keys(COLORS).map((key) => {
-            return (
-              <div
-                key={key}
-                className={cx(styles.colorBox, {
-                  [styles.active]:
-                    COLORS[key] === toolboxState[activeToolItem]?.fill,
-                })}
-                style={{ backgroundColor: COLORS[key] }}
-                onClick={() => {
-                  changeFillColorHandler(activeToolItem, key);
-                }}
-              ></div>
-            );
-          })}
+      {FILL_ITEMS.includes(activeToolItem) && (
+        <div className={styles.section}>
+          <div className={styles.title}>Fill Color</div>
+          <div className={styles.colorContainer}>
+            <div
+              className={cx(styles.colorBox, styles.activePreview)}
+              style={{
+                backgroundColor: toolboxState[activeToolItem]?.fill,
+              }}
+            >
+              {toolboxState[activeToolItem]?.fill === "" && <GiCrossMark />}
+            </div>
+            {Object.keys(COLORS).map((key) => {
+              return (
+                <div
+                  key={key}
+                  className={cx(styles.colorBox, {
+                    [styles.active]:
+                      COLORS[key] === toolboxState[activeToolItem]?.fill,
+                  })}
+                  style={{ backgroundColor: COLORS[key] }}
+                  onClick={() => {
+                    changeFillColorHandler(activeToolItem, key);
+                  }}
+                >
+                  {COLORS[key] === "" && <GiCrossMark />}
+                </div>
+              );
+            })}
+          </div>
         </div>
-      </div>
+      )}
 
       <div className={styles.section}>
-        <div className={styles.title}>Size</div>
-        <input type="range" min={1} max={7} step={1} className="slider" />
+        <div className={styles.title}>
+          Size : {toolboxState[activeToolItem].size}
+        </div>
+        <input
+          type="range"
+          min="1"
+          max="5"
+          step="0.1" //makes it smooth
+          value={toolboxState[activeToolItem].size}
+          onChange={(e) => {
+            chageStrokeSizeHandler(activeToolItem, e.target.value);
+          }}
+          className={styles.slider}
+        />
       </div>
     </div>
   );

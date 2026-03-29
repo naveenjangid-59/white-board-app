@@ -22,7 +22,7 @@ function boardReducer(state, action) {
     }
     case BOARD_ACTIONS.DRAW_DOWN: {
       console.log("insider reducer");
-      const { clientX, clientY, stroke } = action.payload;
+      const { clientX, clientY, stroke, fill, size } = action.payload;
       const id = state.elements.length;
       const x1 = clientX;
       const y1 = clientY;
@@ -32,6 +32,8 @@ function boardReducer(state, action) {
       const newElement = getElement(id, x1, y1, x2, y2, {
         activeToolItem: state.activeToolItem,
         stroke,
+        fill,
+        size,
       });
       console.log("MOUSE_DOWN", newElement);
       return {
@@ -89,6 +91,8 @@ function BoardContextProvider({ children }) {
         clientX: event.clientX,
         clientY: event.clientY,
         stroke: toolboxState[state.activeToolItem].stroke,
+        fill: toolboxState[state.activeToolItem].fill,
+        size: toolboxState[state.activeToolItem].size,
       },
     });
   };
@@ -100,7 +104,6 @@ function BoardContextProvider({ children }) {
       payload: {
         clientX: event.clientX,
         clientY: event.clientY,
-        stroke: toolboxState[state.activeToolItem].stroke,
       },
     });
   };

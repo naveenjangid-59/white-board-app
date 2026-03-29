@@ -3,10 +3,19 @@ import { TOOLS, ARROW_LENGTH } from "../Constants.js";
 import { getArrowHeadsCoordinates, getDrawablePoints } from "./Math.js";
 const generator = rough.generator();
 
-function getElement(id, x1, y1, x2, y2, { activeToolItem, stroke, fill }) {
+function getElement(
+  id,
+  x1,
+  y1,
+  x2,
+  y2,
+  { activeToolItem, stroke, fill, size },
+) {
   let options = {
     seed: id + 1,
-    stroke: stroke,
+    stroke,
+    fill,
+    strokeWidth: size,
   };
   const newElement = {
     id,
