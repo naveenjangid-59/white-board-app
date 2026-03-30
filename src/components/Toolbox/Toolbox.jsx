@@ -81,7 +81,7 @@ const Toolbox = () => {
 
       <div className={styles.section}>
         <div className={styles.title}>
-          Size : {toolboxState[activeToolItem].size}
+          Size : {toolboxState[activeToolItem]?.size}
         </div>
         <input
           type="range"

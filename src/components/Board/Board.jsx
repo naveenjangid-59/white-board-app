@@ -55,6 +55,7 @@ const Board = () => {
           background: "white",
           display: "block",
         }}
+        id="canvas"
         onPointerDown={boardMouseDownHandler}
         onPointerMove={boardMouseMoveHandler}
         onPointerUp={boardMouseUpHandler}

@@ -74,7 +74,6 @@ function getElement(
       newElement.roughElement = generator.linearPath(points, options);
       break;
     default:
-      newElement.roughElement = generator.line(x1, y1, x2, y2, options);
       break;
   }
   return newElement;
