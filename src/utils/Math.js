@@ -61,6 +61,13 @@ export const midPointBtw = (p1, p2) => {
     y: p1.y + (p2.y - p1.y) / 2,
   };
 };
+const toCanvasPoint = (canvas, x, y) => {
+  const rect = canvas.getBoundingClientRect();
+  return {
+    x: ((x - rect.left) * canvas.width) / rect.width,
+    y: ((y - rect.top) * canvas.height) / rect.height,
+  };
+};
 
 const distanceBetweenPoints = (x1, y1, x2, y2) => {
   const dx = x2 - x1;
@@ -92,24 +99,8 @@ export const isPointNearElement = (element, pointX, pointY) => {
       );
     case TOOLS.PEN: {
       if (!canvas || !context || !element.path) return false;
-
-      const rect = canvas.getBoundingClientRect();
-      const scaleX = canvas.width / rect.width;
-      const scaleY = canvas.height / rect.height;
-      const canvasX = (pointX - rect.left) * scaleX;
-      const canvasY = (pointY - rect.top) * scaleY;
-
-      context.save();
-      context.lineWidth =
-        (element.options?.size || 1) + ELEMENT_ERASE_THRESHOLD * 2;
-
-      const hit =
-        (typeof context.isPointInStroke === "function" &&
-          context.isPointInStroke(element.path, canvasX, canvasY)) ||
-        context.isPointInPath(element.path, canvasX, canvasY);
-
-      context.restore();
-      return hit;
+      const { x, y } = toCanvasPoint(canvas, pointX, pointY);
+      return !!context.isPointInStroke?.(element.path, x, y); // one check
     }
     default:
       throw new Error("Type not recognized");
