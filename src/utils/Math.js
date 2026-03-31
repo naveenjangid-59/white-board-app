@@ -70,6 +70,7 @@ const distanceBetweenPoints = (x1, y1, x2, y2) => {
 
 export const isPointNearElement = (element, pointX, pointY) => {
   const { x1, y1, x2, y2, type } = element;
+  const canvas = document.getElementById("canvas");
   const context = document.getElementById("canvas").getContext("2d");
   switch (type) {
     case TOOLS.LINE:
@@ -89,8 +90,27 @@ export const isPointNearElement = (element, pointX, pointY) => {
           pointY <= Math.max(y1, y2) &&
           pointY >= Math.min(y1, y2))
       );
-    case TOOLS.PEN:
-      return context.isPointInPath(element.path, pointX, pointY);
+    case TOOLS.PEN: {
+      if (!canvas || !context || !element.path) return false;
+
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      const canvasX = (pointX - rect.left) * scaleX;
+      const canvasY = (pointY - rect.top) * scaleY;
+
+      context.save();
+      context.lineWidth =
+        (element.options?.size || 1) + ELEMENT_ERASE_THRESHOLD * 2;
+
+      const hit =
+        (typeof context.isPointInStroke === "function" &&
+          context.isPointInStroke(element.path, canvasX, canvasY)) ||
+        context.isPointInPath(element.path, canvasX, canvasY);
+
+      context.restore();
+      return hit;
+    }
     default:
       throw new Error("Type not recognized");
   }

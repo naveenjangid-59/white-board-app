@@ -17,19 +17,55 @@ export const BoardContext = createContext({
   boardMouseMoveHandler: () => {},
   textAreaBlurHandler: () => {},
   boardActionType: "",
+  history: [[]],
+  index: 0,
+  boardUndoHandler: () => {},
+  boardRedoHandler: () => {},
 });
 
 function boardReducer(state, action) {
   switch (action.type) {
+    case BOARD_ACTIONS.UNDO: {
+      if (state.index <= 0) return state;
+      const newIndex = state.index - 1;
+      return {
+        ...state,
+        elements: state.history[newIndex],
+        index: newIndex,
+      };
+    }
+    case BOARD_ACTIONS.REDO: {
+      if (state.index >= state.history.length - 1) return state;
+      const newIndex = state.index + 1;
+      return {
+        ...state,
+        elements: state.history[newIndex],
+        index: newIndex,
+      };
+    }
+    case BOARD_ACTIONS.HISTORY_PUSH: {
+      const elementsCopy = [...state.elements];
+      const newHistory = state.history.slice(0, state.index + 1);
+      newHistory.push(elementsCopy);
+      return {
+        ...state,
+        history: newHistory,
+        index: state.index + 1,
+      };
+    }
     case BOARD_ACTIONS.CHANGE_TEXT: {
       const elementsCopy = [...state.elements];
       const lastIndex = elementsCopy.length - 1;
       const lastEl = { ...elementsCopy[lastIndex] };
       lastEl.text = action.payload.text;
       elementsCopy[lastIndex] = lastEl;
+      const newHistory = state.history.slice(0, state.index + 1);
+      newHistory.push(elementsCopy);
       return {
         ...state,
         elements: elementsCopy,
+        history: newHistory,
+        index: state.index + 1,
         boardActionType: BOARD_ACTION_TYPE.NONE,
       };
     }
@@ -108,6 +144,8 @@ function boardReducer(state, action) {
 const initialBoardState = {
   activeToolItem: TOOLS.PEN,
   elements: [],
+  history: [[]],
+  index: 0,
   boardActionType: BOARD_ACTION_TYPE.NONE,
 };
 
@@ -180,9 +218,22 @@ function BoardContextProvider({ children }) {
 
   const boardMouseUpHandler = (event) => {
     if (state.boardActionType === BOARD_ACTION_TYPE.WRITING) return;
+    if (state.boardActionType === BOARD_ACTION_TYPE.DRAWING) {
+      dispatchBoardAction({
+        type: BOARD_ACTIONS.HISTORY_PUSH,
+      });
+    }
     dispatchBoardAction({
       type: BOARD_ACTIONS.DRAW_UP,
     });
+  };
+
+  const boardUndoHandler = () => {
+    dispatchBoardAction({ type: BOARD_ACTIONS.UNDO });
+  };
+
+  const boardRedoHandler = () => {
+    dispatchBoardAction({ type: BOARD_ACTIONS.REDO });
   };
 
   const contextValue = {
@@ -194,6 +245,8 @@ function BoardContextProvider({ children }) {
     boardMouseMoveHandler,
     boardMouseUpHandler,
     textAreaBlurHandler,
+    boardUndoHandler,
+    boardRedoHandler,
   };
   return (
     <BoardContext.Provider value={contextValue}>

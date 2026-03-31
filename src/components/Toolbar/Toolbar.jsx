@@ -9,9 +9,15 @@ import { BoardContext } from "@/store/BoardContext";
 import { FaArrowRightLong } from "react-icons/fa6";
 import { FaEraser } from "react-icons/fa";
 import { MdFormatColorText } from "react-icons/md";
+import { FiRotateCcw, FiRotateCw } from "react-icons/fi";
 
 const Toolbar = () => {
-  const { activeToolItem, handleToolItemChange } = useContext(BoardContext);
+  const {
+    activeToolItem,
+    handleToolItemChange,
+    boardRedoHandler,
+    boardUndoHandler,
+  } = useContext(BoardContext);
   return (
     <div className={styles.toolbarContainer}>
       <div
@@ -83,6 +89,22 @@ const Toolbar = () => {
         }}
       >
         <FaEraser />
+      </div>
+      <div
+        className={cx(styles.toolItem)}
+        onClick={() => {
+          boardUndoHandler();
+        }}
+      >
+        <FiRotateCcw />
+      </div>
+      <div
+        className={cx(styles.toolItem)}
+        onClick={() => {
+          boardRedoHandler();
+        }}
+      >
+        <FiRotateCw />
       </div>
     </div>
   );
