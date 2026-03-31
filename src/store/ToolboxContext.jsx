@@ -7,7 +7,7 @@ const ToolboxContext = createContext();
 const initialToolboxState = {
   [TOOLS.PEN]: {
     stroke: COLORS.BLACK,
-    size: 1,
+    size: 3,
   },
   [TOOLS.LINE]: {
     stroke: COLORS.BLACK,
@@ -28,10 +28,10 @@ const initialToolboxState = {
     size: 1,
   },
   [TOOLS.ERASER]: { size: 1 },
-  // [TOOLS.TEXT]: {
-  //   stroke: COLORS.BLACK,
-  //   size: 32,
-  // },
+  [TOOLS.TEXT]: {
+    stroke: COLORS.BLACK,
+    size: 16,
+  },
 };
 
 function toolboxReducer(state, action) {
@@ -94,7 +94,7 @@ const ToolboxContextProvider = ({ children }) => {
   const chageStrokeSizeHandler = (activeToolItem, newSize) => {
     dispatchToolBoxAction({
       type: TOOLBOX_ACTIONS.CHANGE_SIZE,
-      payload: { tool: activeToolItem, newSize: newSize },
+      payload: { tool: activeToolItem, newSize: parseFloat(newSize) },
     });
   };
 

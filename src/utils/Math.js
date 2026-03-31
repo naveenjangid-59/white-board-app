@@ -31,10 +31,23 @@ export const getDrawablePoints = (x1, y1, x2, y2, x3, y3, x4, y4) => {
   }
 };
 
-export const isPointCloseToLine = (x1, y1, x2, y2, pointX, pointY) => {
+export const isPointCloseToLine = (
+  x1,
+  y1,
+  x2,
+  y2,
+  pointX,
+  pointY,
+  isCircle = 0,
+) => {
   const distToStart = distanceBetweenPoints(x1, y1, pointX, pointY);
   const distToEnd = distanceBetweenPoints(x2, y2, pointX, pointY);
   const distLine = distanceBetweenPoints(x1, y1, x2, y2);
+  if (Math.abs(x1 - x2) < 5 && Math.abs(y1 - y2) < 5)
+    return (
+      Math.abs(distToStart + distToEnd - distLine) <
+      ELEMENT_ERASE_THRESHOLD * 70
+    );
   return Math.abs(distToStart + distToEnd - distLine) < ELEMENT_ERASE_THRESHOLD;
 };
 
@@ -66,10 +79,10 @@ export const isPointNearElement = (element, pointX, pointY) => {
     case TOOLS.CIRCLE:
       const { fill } = element.options;
       return (
-        isPointCloseToLine(x1, y1, x2, y1, pointX, pointY) ||
-        isPointCloseToLine(x2, y1, x2, y2, pointX, pointY) ||
-        isPointCloseToLine(x2, y2, x1, y2, pointX, pointY) ||
-        isPointCloseToLine(x1, y2, x1, y1, pointX, pointY) ||
+        isPointCloseToLine(x1, y1, x2, y1, pointX, pointY, 1) ||
+        isPointCloseToLine(x2, y1, x2, y2, pointX, pointY, 1) ||
+        isPointCloseToLine(x2, y2, x1, y2, pointX, pointY, 1) ||
+        isPointCloseToLine(x1, y2, x1, y1, pointX, pointY, 1) ||
         (fill !== "" &&
           pointX <= Math.max(x1, x2) &&
           pointX >= Math.min(x1, x2) &&

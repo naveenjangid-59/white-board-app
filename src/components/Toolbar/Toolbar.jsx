@@ -8,6 +8,7 @@ import { useContext } from "react";
 import { BoardContext } from "@/store/BoardContext";
 import { FaArrowRightLong } from "react-icons/fa6";
 import { FaEraser } from "react-icons/fa";
+import { MdFormatColorText } from "react-icons/md";
 
 const Toolbar = () => {
   const { activeToolItem, handleToolItemChange } = useContext(BoardContext);
@@ -62,6 +63,16 @@ const Toolbar = () => {
         }}
       >
         <FaArrowRightLong />
+      </div>
+      <div
+        className={cx(styles.toolItem, {
+          [styles.active]: activeToolItem === TOOLS.TEXT,
+        })}
+        onClick={() => {
+          handleToolItemChange(TOOLS.TEXT);
+        }}
+      >
+        <MdFormatColorText />
       </div>
       <div
         className={cx(styles.toolItem, {

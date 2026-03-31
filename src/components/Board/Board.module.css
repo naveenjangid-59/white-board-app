@@ -4,3 +4,21 @@ canvas {
   left: 0;
   z-index: 1;
 }
+
+.textElementBox {
+  position: fixed;
+  border: none;
+  background: transparent;
+  resize: none;
+  outline: none;
+  padding: 0;
+  margin: 0;
+  width: auto;
+  height: auto;
+  overflow: hidden;
+  font-size: inherit;
+  font-family: inherit;
+  color: inherit;
+  line-height: inherit;
+  font-family: "Caveat";
+}

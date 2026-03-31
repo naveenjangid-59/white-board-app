@@ -15,10 +15,24 @@ export const BoardContext = createContext({
   boardMouseDownHandler: () => {},
   boardMouseUpHandler: () => {},
   boardMouseMoveHandler: () => {},
+  textAreaBlurHandler: () => {},
+  boardActionType: "",
 });
 
 function boardReducer(state, action) {
   switch (action.type) {
+    case BOARD_ACTIONS.CHANGE_TEXT: {
+      const elementsCopy = [...state.elements];
+      const lastIndex = elementsCopy.length - 1;
+      const lastEl = { ...elementsCopy[lastIndex] };
+      lastEl.text = action.payload.text;
+      elementsCopy[lastIndex] = lastEl;
+      return {
+        ...state,
+        elements: elementsCopy,
+        boardActionType: BOARD_ACTION_TYPE.NONE,
+      };
+    }
     case BOARD_ACTIONS.ERASE: {
       const { clientX, clientY } = action.payload;
       let elementsCopy = [...state.elements];
@@ -40,7 +54,7 @@ function boardReducer(state, action) {
       return { ...state, boardActionType: actionType };
     }
     case BOARD_ACTIONS.DRAW_DOWN: {
-      console.log("insider reducer");
+      // console.log("insider reducer");
       const { clientX, clientY, stroke, fill, size } = action.payload;
       const id = state.elements.length;
       const x1 = clientX;
@@ -54,10 +68,13 @@ function boardReducer(state, action) {
         fill,
         size,
       });
-      console.log("MOUSE_DOWN", newElement);
+      // console.log("MOUSE_DOWN", newElement);
       return {
         ...state,
-        boardActionType: BOARD_ACTION_TYPE.DRAWING,
+        boardActionType:
+          state.activeToolItem === TOOLS.TEXT
+            ? BOARD_ACTION_TYPE.WRITING
+            : BOARD_ACTION_TYPE.DRAWING,
         elements: [...state.elements, newElement],
       };
     }
@@ -100,14 +117,22 @@ function BoardContextProvider({ children }) {
     initialBoardState,
   );
   const { toolboxState } = useContext(ToolboxContext);
+
   const handleToolItemChange = (toolItem) => {
     dispatchBoardAction({ type: BOARD_ACTIONS.CHANGE_TOOL, payload: toolItem });
   };
 
+  const textAreaBlurHandler = (text) => {
+    dispatchBoardAction({
+      type: BOARD_ACTIONS.CHANGE_TEXT,
+      payload: { text: text },
+    });
+  };
+
   const boardMouseDownHandler = (event) => {
-    // console.log(1);
+    if (state.boardActionType === BOARD_ACTION_TYPE.WRITING) return;
     if (event.pointerType === "mouse" && event.buttons !== 1) return;
-    // console.log(2);
+
     if (state.activeToolItem === TOOLS.ERASER) {
       dispatchBoardAction({
         type: BOARD_ACTIONS.CHANGE_ACTION_TYPE,
@@ -115,6 +140,7 @@ function BoardContextProvider({ children }) {
       });
       return;
     }
+
     dispatchBoardAction({
       type: BOARD_ACTIONS.DRAW_DOWN,
       payload: {
@@ -128,30 +154,32 @@ function BoardContextProvider({ children }) {
   };
 
   const boardMouseMoveHandler = (event) => {
+    if (state.boardActionType === BOARD_ACTION_TYPE.WRITING) return;
     if (
-      state.boardActionType === BOARD_ACTION_TYPE.NONE ||
-      state.elements.length === 0
+      state.boardActionType === BOARD_ACTION_TYPE.DRAWING ||
+      state.boardActionType === BOARD_ACTION_TYPE.ERASING ||
+      state.elements.length !== 0
     ) {
-      return state;
-    }
-    if (state.boardActionType === BOARD_ACTION_TYPE.ERASING) {
-      const { clientX, clientY } = event;
-      dispatchBoardAction({
-        type: BOARD_ACTIONS.ERASE,
-        payload: { clientX, clientY },
-      });
-    } else if (state.boardActionType === BOARD_ACTION_TYPE.DRAWING) {
-      dispatchBoardAction({
-        type: BOARD_ACTIONS.DRAW_MOVE,
-        payload: {
-          clientX: event.clientX,
-          clientY: event.clientY,
-        },
-      });
+      if (state.boardActionType === BOARD_ACTION_TYPE.ERASING) {
+        const { clientX, clientY } = event;
+        dispatchBoardAction({
+          type: BOARD_ACTIONS.ERASE,
+          payload: { clientX, clientY },
+        });
+      } else if (state.boardActionType === BOARD_ACTION_TYPE.DRAWING) {
+        dispatchBoardAction({
+          type: BOARD_ACTIONS.DRAW_MOVE,
+          payload: {
+            clientX: event.clientX,
+            clientY: event.clientY,
+          },
+        });
+      }
     }
   };
 
   const boardMouseUpHandler = (event) => {
+    if (state.boardActionType === BOARD_ACTION_TYPE.WRITING) return;
     dispatchBoardAction({
       type: BOARD_ACTIONS.DRAW_UP,
     });
@@ -160,10 +188,12 @@ function BoardContextProvider({ children }) {
   const contextValue = {
     activeToolItem: state.activeToolItem,
     elements: state.elements,
+    boardActionType: state.boardActionType,
     handleToolItemChange,
     boardMouseDownHandler,
     boardMouseMoveHandler,
     boardMouseUpHandler,
+    textAreaBlurHandler,
   };
   return (
     <BoardContext.Provider value={contextValue}>

@@ -29,12 +29,19 @@ function getElement(
   };
 
   switch (activeToolItem) {
+    case TOOLS.TEXT: {
+      newElement.text = "";
+      break;
+    }
     case TOOLS.PEN: {
       const penElement = {
         id,
         points: [{ x: x1, y: y1 }],
         type: activeToolItem,
-        path: new Path2D(getSvgPathFromStroke(getStroke([{ x: x1, y: y1 }]))),
+        size,
+        path: new Path2D(
+          getSvgPathFromStroke(getStroke([{ x: x1, y: y1 }], { size: size })),
+        ),
         stroke,
       };
       return penElement;
@@ -85,7 +92,9 @@ function getLastElement(lastElement, x2, y2, { activeToolItem }) {
   switch (activeToolItem) {
     case TOOLS.PEN: {
       ele.points = [...ele.points, { x: x2, y: y2 }];
-      ele.path = new Path2D(getSvgPathFromStroke(getStroke(ele.points)));
+      ele.path = new Path2D(
+        getSvgPathFromStroke(getStroke(ele.points, { size: ele.size })),
+      );
       break;
     }
     case TOOLS.LINE:
