@@ -21,6 +21,7 @@ export const BoardContext = createContext({
   index: 0,
   boardUndoHandler: () => {},
   boardRedoHandler: () => {},
+  boardMouseDownHandler: () => {},
 });
 
 function boardReducer(state, action) {
@@ -135,6 +136,23 @@ function boardReducer(state, action) {
     case BOARD_ACTIONS.DRAW_UP: {
       return { ...state, boardActionType: BOARD_ACTION_TYPE.NONE };
     }
+    case BOARD_ACTIONS.DOWNLOAD: {
+      const canvas = document.getElementById("canvas");
+      const exportCanvas = document.createElement("canvas");
+      exportCanvas.width = canvas.width;
+      exportCanvas.height = canvas.height;
+      const exportCtx = exportCanvas.getContext("2d");
+      const bg = getComputedStyle(canvas).backgroundColor || "#ffffff";
+      exportCtx.fillStyle = bg;
+      exportCtx.fillRect(0, 0, exportCanvas.width, exportCanvas.height);
+      exportCtx.drawImage(canvas, 0, 0);
+
+      const data = exportCanvas.toDataURL("image/png");
+      const anchor = document.createElement("a");
+      anchor.href = data;
+      anchor.download = `whiteboard-${Date.now()}.png`;
+      anchor.click();
+    }
     default: {
       return state;
     }
@@ -236,6 +254,10 @@ function BoardContextProvider({ children }) {
     dispatchBoardAction({ type: BOARD_ACTIONS.REDO });
   };
 
+  const boardDownloadHandler = () => {
+    dispatchBoardAction({ type: BOARD_ACTIONS.DOWNLOAD });
+  };
+
   const contextValue = {
     activeToolItem: state.activeToolItem,
     elements: state.elements,
@@ -247,7 +269,9 @@ function BoardContextProvider({ children }) {
     textAreaBlurHandler,
     boardUndoHandler,
     boardRedoHandler,
+    boardDownloadHandler,
   };
+
   return (
     <BoardContext.Provider value={contextValue}>
       {children}

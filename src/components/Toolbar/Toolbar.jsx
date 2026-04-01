@@ -10,6 +10,7 @@ import { FaArrowRightLong } from "react-icons/fa6";
 import { FaEraser } from "react-icons/fa";
 import { MdFormatColorText } from "react-icons/md";
 import { FiRotateCcw, FiRotateCw } from "react-icons/fi";
+import { FaCloudDownloadAlt } from "react-icons/fa";
 
 const Toolbar = () => {
   const {
@@ -17,6 +18,7 @@ const Toolbar = () => {
     handleToolItemChange,
     boardRedoHandler,
     boardUndoHandler,
+    boardDownloadHandler,
   } = useContext(BoardContext);
   return (
     <div className={styles.toolbarContainer}>
@@ -105,6 +107,14 @@ const Toolbar = () => {
         }}
       >
         <FiRotateCw />
+      </div>
+      <div
+        className={cx(styles.toolItem)}
+        onClick={() => {
+          boardDownloadHandler();
+        }}
+      >
+        <FaCloudDownloadAlt />
       </div>
     </div>
   );
