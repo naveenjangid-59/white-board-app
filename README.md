@@ -1,16 +1,93 @@
-# React + Vite
+# White Board App
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A React-based whiteboard application for freehand drawing, shapes, text, erasing, undo/redo, and image export.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Draw with **Pen**
+- Create **Line, Rectangle, Circle, Arrow**
+- Add **Text** on canvas
+- **Eraser** support (including pen strokes)
+- **Stroke color**, **Fill color**, and **Size** controls
+- **Undo / Redo** with history tracking
+- Download canvas as **PNG**
 
-## React Compiler
+## Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **React**
+- **Context API + useReducer** (state management)
+- **HTML5 Canvas API**
+- **Rough.js** (hand-drawn style shapes)
+- **CSS Modules**
 
-## Expanding the ESLint configuration
+## Project Structure
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+```text
+src/
+  components/
+    Board/
+    Toolbar/
+    Toolbox/
+    ui/
+  store/
+    BoardContext.jsx
+    ToolboxContext.jsx
+  utils/
+    Element.js
+    Math.js
+    svgPathFromStroke.js
+  Constants.js
+  App.jsx
+  main.jsx
+```
+
+## Getting Started
+
+### 1) Clone the repository
+
+```bash
+git clone <your-repo-url>
+cd "White Board App"
+```
+
+### 2) Install dependencies
+
+```bash
+npm install
+```
+
+### 3) Run development server
+
+```bash
+npm run dev
+```
+
+### 4) Build for production
+
+```bash
+npm run build
+```
+
+### 5) Preview production build
+
+```bash
+npm run preview
+```
+
+## Usage
+
+- Select a tool from the toolbar.
+- Customize stroke/fill/size from toolbox.
+- Draw on canvas using mouse or trackpad.
+- Use undo/redo for history navigation.
+- Download the board as an image.
+
+## Notes
+
+- Text tool enters writing mode on click.
+- Eraser uses near-element hit detection for all supported element types.
+- Download export preserves canvas background by rendering to an export canvas first.
+
+## License
+
+This project is for learning and personal development use.
