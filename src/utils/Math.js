@@ -100,7 +100,34 @@ export const isPointNearElement = (element, pointX, pointY) => {
     case TOOLS.PEN: {
       if (!canvas || !context || !element.path) return false;
       const { x, y } = toCanvasPoint(canvas, pointX, pointY);
-      return !!context.isPointInStroke?.(element.path, x, y); // one check
+      return !!context.isPointInStroke?.(element.path, x, y);
+    }
+    case TOOLS.TEXT: {
+      context.font = `400 ${element.options.strokeWidth}px "Raleway", sans-serif`;
+      context.fillStyle = element.options.stroke;
+      const textWidth = context.measureText(element.text).width;
+      const textHeight = parseInt(element.options.strokeWidth);
+      context.restore();
+      return (
+        isPointCloseToLine(x1, y1, x1 + textWidth, y1, pointX, pointY) ||
+        isPointCloseToLine(
+          x1 + textWidth,
+          y1,
+          x1 + textWidth,
+          y1 + textHeight,
+          pointX,
+          pointY,
+        ) ||
+        isPointCloseToLine(
+          x1 + textWidth,
+          y1 + textHeight,
+          x1,
+          y1 + textHeight,
+          pointX,
+          pointY,
+        ) ||
+        isPointCloseToLine(x1, y1 + textHeight, x1, y1, pointX, pointY)
+      );
     }
     default:
       throw new Error("Type not recognized");
