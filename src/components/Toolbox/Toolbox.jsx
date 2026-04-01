@@ -22,10 +22,17 @@ const Toolbox = () => {
         <div className={styles.section}>
           <div className={styles.title}>Stroke Color</div>
           <div className={styles.colorContainer}>
-            <div
+            <input
+              type="color"
+              id="favcolor"
+              name="favcolor"
               className={cx(styles.colorBox, styles.activePreview)}
-              style={{
-                backgroundColor: toolboxState[activeToolItem]?.stroke,
+              // style={{
+              //   backgroundColor: toolboxState[activeToolItem]?.stroke,
+              // }}
+              value={toolboxState[activeToolItem]?.stroke}
+              onChange={(e) => {
+                changeStrokeColorHandler(activeToolItem, e.target.value);
               }}
             />
             {Object.keys(COLORS).map((key) => {
@@ -51,28 +58,53 @@ const Toolbox = () => {
           <div className={styles.section}>
             <div className={styles.title}>Fill Color</div>
             <div className={styles.colorContainer}>
-              <div
-                className={cx(styles.colorBox, styles.activePreview)}
-                style={{
-                  backgroundColor: toolboxState[activeToolItem]?.fill,
-                }}
-              >
-                {toolboxState[activeToolItem]?.fill === "" && <GiCrossMark />}
-              </div>
+              {toolboxState[activeToolItem]?.fill === "" ? (
+                <div
+                  className={cx(styles.colorBox, styles.activePreview)}
+                  style={{
+                    backgroundColor: toolboxState[activeToolItem]?.fill,
+                  }}
+                  onClick={() =>
+                    changeFillColorHandler(activeToolItem, "BLACK")
+                  }
+                >
+                  <GiCrossMark />
+                </div>
+              ) : (
+                <input
+                  type="color"
+                  id="favcolor"
+                  name="favcolor"
+                  className={cx(styles.colorBox, styles.activePreview)}
+                  style={{
+                    backgroundColor: toolboxState[activeToolItem]?.fill,
+                  }}
+                  value={toolboxState[activeToolItem]?.fill}
+                  onChange={(e) => {
+                    changeFillColorHandler(activeToolItem, e.target.value);
+                  }}
+                />
+              )}
+
               {Object.keys(COLORS).map((key) => {
+                const colorValue = COLORS[key];
+                const isNone = colorValue === "";
+
                 return (
                   <div
                     key={key}
                     className={cx(styles.colorBox, {
                       [styles.active]:
-                        COLORS[key] === toolboxState[activeToolItem]?.fill,
+                        colorValue === toolboxState[activeToolItem]?.fill,
                     })}
-                    style={{ backgroundColor: COLORS[key] }}
+                    style={{
+                      backgroundColor: isNone ? "transparent" : colorValue,
+                    }}
                     onClick={() => {
-                      changeFillColorHandler(activeToolItem, key);
+                      changeFillColorHandler(activeToolItem, isNone ? "" : key);
                     }}
                   >
-                    {COLORS[key] === "" && <GiCrossMark />}
+                    {isNone && <GiCrossMark />}
                   </div>
                 );
               })}

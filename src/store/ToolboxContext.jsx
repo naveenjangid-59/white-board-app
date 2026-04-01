@@ -42,7 +42,7 @@ function toolboxReducer(state, action) {
         ...state,
         [tool]: {
           ...state[tool],
-          stroke: COLORS[color],
+          stroke: COLORS[color] || color,
         },
       };
     }
@@ -52,7 +52,7 @@ function toolboxReducer(state, action) {
         ...state,
         [tool]: {
           ...state[tool],
-          fill: COLORS[color],
+          fill: COLORS[color] || color,
         },
       };
     }
