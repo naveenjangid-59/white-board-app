@@ -20,6 +20,8 @@ const Board = () => {
     textAreaBlurHandler,
     elements,
     boardActionType,
+    boardRedoHandler,
+    boardUndoHandler,
   } = useContext(BoardContext);
 
   const drawBoard = useCallback(() => {
@@ -83,6 +85,21 @@ const Board = () => {
   useLayoutEffect(() => {
     drawBoard();
   }, [drawBoard]);
+
+  useLayoutEffect(() => {
+    function handleKeyDown(event) {
+      if (event.ctrlKey && event.key === "z") {
+        boardUndoHandler();
+      } else if (event.ctrlKey && event.key === "y") {
+        boardRedoHandler();
+      }
+    }
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [boardUndoHandler, boardRedoHandler]);
 
   //redraw on viewport resize
   useEffect(() => {
