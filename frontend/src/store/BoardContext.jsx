@@ -1,10 +1,17 @@
-import { createContext, useReducer } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useReducer,
+  useState,
+} from "react";
 import { TOOLS, BOARD_ACTIONS, BOARD_ACTION_TYPE } from "../Constants.js";
 import { getElement, getLastElement } from "@/utils/Element.js";
 import { ToolboxContext } from "./ToolboxContext.jsx";
-import { useContext } from "react";
 import { isPointNearElement } from "@/utils/Math.js";
 import rough from "roughjs";
+import api from "../Api.js";
+import { useNavigate } from "react-router-dom";
 
 const generator = rough.generator();
 
@@ -22,6 +29,12 @@ export const BoardContext = createContext({
   boardUndoHandler: () => {},
   boardRedoHandler: () => {},
   boardMouseDownHandler: () => {},
+  profile: null,
+  isLoggedIn: false,
+  setLoginStatusHandler: () => {},
+  setProfileHandler: () => {},
+  logoutHandler: () => {},
+  authLoading: false,
 });
 
 function boardReducer(state, action) {
@@ -153,6 +166,16 @@ function boardReducer(state, action) {
       anchor.download = `whiteboard-${Date.now()}.png`;
       anchor.click();
     }
+
+    case BOARD_ACTIONS.SET_PROFILE: {
+      return { ...state, profile: action.payload };
+    }
+    case BOARD_ACTIONS.SET_LOGIN_STATUS: {
+      return { ...state, isLoggedIn: action.payload };
+    }
+    case BOARD_ACTIONS.LOGOUT: {
+      return { ...state, profile: null, isLoggedIn: false };
+    }
     default: {
       return state;
     }
@@ -165,6 +188,8 @@ const initialBoardState = {
   history: [[]],
   index: 0,
   boardActionType: BOARD_ACTION_TYPE.NONE,
+  profile: null,
+  isLoggedIn: false,
 };
 
 function BoardContextProvider({ children }) {
@@ -172,7 +197,37 @@ function BoardContextProvider({ children }) {
     boardReducer,
     initialBoardState,
   );
+  const [authLoading, setAuthLoading] = useState(true);
+  const navigate = useNavigate();
   const { toolboxState } = useContext(ToolboxContext);
+
+  const setProfileHandler = (data) => {
+    const normalizedProfile = data?.data?.user || data?.data || data || null;
+    dispatchBoardAction({
+      type: BOARD_ACTIONS.SET_PROFILE,
+      payload: normalizedProfile,
+    });
+  };
+
+  const setLoginStatusHandler = (status) => {
+    dispatchBoardAction({
+      type: BOARD_ACTIONS.SET_LOGIN_STATUS,
+      payload: status,
+    });
+  };
+
+  const logoutHandler = async () => {
+    try {
+      await api.post("/user/logout");
+    } catch (error) {
+      console.error("Error during logout:", error);
+    } finally {
+      dispatchBoardAction({
+        type: BOARD_ACTIONS.LOGOUT,
+      });
+      navigate("/");
+    }
+  };
 
   const handleToolItemChange = (toolItem) => {
     dispatchBoardAction({ type: BOARD_ACTIONS.CHANGE_TOOL, payload: toolItem });
@@ -258,6 +313,33 @@ function BoardContextProvider({ children }) {
     dispatchBoardAction({ type: BOARD_ACTIONS.DOWNLOAD });
   };
 
+  useEffect(() => {
+    let mounted = true;
+
+    const bootstrapAuth = async () => {
+      try {
+        const res = await api.get("/user/profile");
+        if (!mounted) return;
+
+        setProfileHandler(res.data);
+        setLoginStatusHandler(true);
+      } catch (_) {
+        if (!mounted) return;
+
+        setProfileHandler(null);
+        setLoginStatusHandler(false);
+      } finally {
+        if (mounted) setAuthLoading(false);
+      }
+    };
+
+    bootstrapAuth();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
   const contextValue = {
     activeToolItem: state.activeToolItem,
     elements: state.elements,
@@ -270,6 +352,12 @@ function BoardContextProvider({ children }) {
     boardUndoHandler,
     boardRedoHandler,
     boardDownloadHandler,
+    setLoginStatusHandler,
+    setProfileHandler,
+    profile: state.profile,
+    isLoggedIn: state.isLoggedIn,
+    authLoading,
+    logoutHandler,
   };
 
   return (
@@ -278,4 +366,5 @@ function BoardContextProvider({ children }) {
     </BoardContext.Provider>
   );
 }
+
 export { BoardContextProvider };

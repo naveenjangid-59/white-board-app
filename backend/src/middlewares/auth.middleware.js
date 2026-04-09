@@ -34,10 +34,9 @@ const verifyJWT = async (req, res, next) => {
         success: false,
       });
     }
-    return res.status(401).json({
-      message: error.message || "Invalid or expired token",
-      success: false,
-    });
+    return res
+      .status(401)
+      .json(new ApiError(401, "Unauthorized: Invalid token"));
   }
 };
 

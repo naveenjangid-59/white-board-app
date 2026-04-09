@@ -6,6 +6,7 @@ import {
   refreshAccessToken,
   logout,
 } from "../controllers/user.controller.js";
+import { getAllCanvases } from "../controllers/canvas.controller.js";
 import verifyJWT from "../middlewares/auth.middleware.js";
 
 const router = express.Router();

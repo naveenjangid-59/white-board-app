@@ -7,12 +7,15 @@ import React, {
 } from "react";
 import { BoardContext } from "@/store/BoardContext";
 import rough from "roughjs";
+import { useNavigate } from "react-router-dom";
 import { TOOLS, BOARD_ACTION_TYPE } from "@/Constants";
 import styles from "./Board.module.css";
 
 const Board = () => {
   const textAreaRef = useRef();
   const boardCanvasRef = useRef();
+  const navigate = useNavigate();
+
   const {
     boardMouseDownHandler,
     boardMouseMoveHandler,
@@ -22,6 +25,9 @@ const Board = () => {
     boardActionType,
     boardRedoHandler,
     boardUndoHandler,
+    profile,
+    setLoginStatusHandler,
+    setProfileHandler,
   } = useContext(BoardContext);
 
   const drawBoard = useCallback(() => {

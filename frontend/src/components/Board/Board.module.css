@@ -22,3 +22,45 @@ canvas {
   line-height: inherit;
   font-family: "Caveat";
 }
+
+.floatingBtn {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+
+  padding: 0.6rem 1.2rem;
+  border-radius: 999px; /* pill shape */
+
+  background: #ef4444; /* red (logout/danger) */
+  color: white;
+  font-size: 0.95rem;
+  font-weight: 600;
+
+  border: none;
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+
+  transition: all 0.2s ease;
+  z-index: 1100;
+}
+
+.floatingBtn:hover {
+  background: #dc2626; /* darker red */
+  transform: translateY(-2px);
+  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.2);
+}
+
+.floatingBtn:active {
+  transform: translateY(0);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+}
+
+.floatingBtn:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.3);
+}

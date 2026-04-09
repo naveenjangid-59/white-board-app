@@ -59,13 +59,16 @@ const register = async (req, res) => {
       .status(201)
       .json(new ApiResponse(201, safeUser, "User registered successfully"));
   } catch (error) {
-    console.error("Register error:", error);
+    console.error("Registeration error:", error);
 
-    return res.status(error.statusCode || 500).json({
-      message: error.message || "Registration failed",
-      statusCode: error.statusCode || 500,
-      success: false,
-    });
+    return res
+      .status(error.statusCode || 500)
+      .json(
+        new ApiError(
+          error.statusCode || 500,
+          error.message || "Registration failed",
+        ),
+      );
   }
 };
 
@@ -122,20 +125,31 @@ const login = async (req, res) => {
         ),
       );
   } catch (error) {
-    res.status(error.statusCode || 500).json({
-      message: error.message || "Login failed",
-      statusCode: error.statusCode || 500,
-      success: false,
-    });
+    res
+      .status(error.statusCode || 500)
+      .json(
+        new ApiError(error.statusCode || 500, error.message || "Login failed"),
+      );
   }
 };
 
 const profile = async (req, res) => {
-  const user = req.user; // set by auth middleware
+  try {
+    const user = req.user; // set by auth middleware
 
-  return res
-    .status(200)
-    .json(new ApiResponse(200, user, "User profile fetched successfully"));
+    return res
+      .status(200)
+      .json(new ApiResponse(200, user, "User profile fetched successfully"));
+  } catch (error) {
+    return res
+      .status(error.statusCode || 500)
+      .json(
+        new ApiError(
+          error.statusCode || 500,
+          error.message || "Failed to fetch user profile",
+        ),
+      );
+  }
 };
 
 const refreshAccessToken = async (req, res) => {
@@ -163,8 +177,6 @@ const refreshAccessToken = async (req, res) => {
 
     const newAccessToken = user.generateAccessToken();
 
-    const newRefreshToken = user.generateRefreshToken();
-    user.refreshToken = newRefreshToken;
     await user.save({ validateBeforeSave: false });
 
     const options = {
@@ -177,21 +189,14 @@ const refreshAccessToken = async (req, res) => {
     return res
       .status(200)
       .cookie("accessToken", newAccessToken, options)
-      .cookie("refreshToken", newRefreshToken, options)
       .json(new ApiResponse(200, {}, "Access token refreshed successfully"));
   } catch (error) {
     if (error.name === "TokenExpiredError") {
-      return res.status(401).json({
-        message: "RefreshTokenExpired",
-        customMessage: "refresh token has expired, please log in again",
-        success: false,
-      });
+      return res.status(401).json(new ApiError(401, "RefreshTokenExpired"));
     }
-    return res.status(401).json({
-      message: error.message || "Invalid refresh token",
-      customMessage: "general error in refresh token",
-      success: false,
-    });
+    return res
+      .status(401)
+      .json(new ApiError(401, error.message || "Invalid refresh token"));
   }
 };
 
@@ -207,13 +212,14 @@ const logout = async (req, res) => {
       secure: true,
     };
 
+    console.log("User logged out successfully");
     return res
       .status(200)
       .clearCookie("refreshToken", options)
       .clearCookie("accessToken", options)
       .json(new ApiResponse(200, {}, "User logged out successfully"));
   } catch (error) {
-    return res.status(500).json(new ApiError(500, "Logout failed", false));
+    return res.status(500).json(new ApiError(500, "Logout failed"));
   }
 };
 

@@ -42,6 +42,18 @@
   align-items: center;
 }
 
+.userActions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.welcomeText {
+  color: #374151;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
 .loginBtn {
   padding: 0.5rem 1rem;
   background: transparent;
@@ -54,6 +66,14 @@
 
 .loginBtn:hover {
   color: #111827;
+}
+
+.loginBtn:focus-visible,
+.signupBtn:focus-visible,
+.ctaBtn:focus-visible,
+.logoutBtn:focus-visible {
+  outline: 3px solid rgba(79, 70, 229, 0.3);
+  outline-offset: 2px;
 }
 
 .signupBtn {
@@ -72,6 +92,24 @@
 .signupBtn:hover {
   background-color: #4338ca;
   transform: translateY(-1px);
+}
+
+.logoutBtn {
+  padding: 0.55rem 1rem;
+  border: 1px solid #e5e7eb;
+  background-color: #ffffff;
+  color: #111827;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.logoutBtn:hover {
+  border-color: #d1d5db;
+  background-color: #f9fafb;
 }
 
 /* --- Hero Section --- */
@@ -145,9 +183,10 @@
 
 .mockupImg {
   width: 100%;
-  height: auto; /* Maintains the aspect ratio */
+  height: 100%;
   display: block; /* Removes the small gap below the image */
   object-fit: cover;
+  border-radius: 16px;
 }
 
 /* --- Features Section --- */
@@ -241,6 +280,10 @@
   /* Shrink the gap between buttons */
   .navButtons {
     gap: 0.5rem;
+  }
+
+  .welcomeText {
+    display: none;
   }
 
   /* Make both buttons smaller instead of hiding Login */

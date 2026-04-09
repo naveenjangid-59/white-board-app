@@ -84,6 +84,12 @@
   text-align: center;
 }
 
+.errorText {
+  color: #dc2626;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
 .form {
   display: flex;
   flex-direction: column;
@@ -132,6 +138,11 @@
   background-color: #374151;
 }
 
+.submitBtn:disabled {
+  background-color: #9ca3af;
+  cursor: not-allowed;
+}
+
 .footer {
   margin-top: 1.5rem;
   text-align: center;
@@ -148,4 +159,15 @@
 }
 .toggleBtn:hover {
   text-decoration: underline;
+}
+
+@media (max-width: 480px) {
+  .modalContainer {
+    padding: 1.5rem;
+    border-radius: 14px;
+  }
+
+  .title {
+    font-size: 1.4rem;
+  }
 }

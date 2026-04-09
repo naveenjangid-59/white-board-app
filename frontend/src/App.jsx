@@ -1,19 +1,21 @@
 import React from "react";
-import Board from "./components/Board/Board";
-import Toolbar from "./components/Toolbar/Toolbar";
-import Toolbox from "./components/Toolbox/Toolbox";
-import { BoardContextProvider } from "./store/BoardContext";
-import { ToolboxContextProvider } from "./store/ToolboxContext";
-
+import LandingPage from "./components/LandingPage/LandingPage";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Dashboard from "./components/Dashboard/Dashboard";
+import { BoardContextProvider } from "./store/BoardContext.jsx";
+import { ToolboxContextProvider } from "./store/ToolboxContext.jsx";
 const App = () => {
   return (
-    <ToolboxContextProvider>
-      <BoardContextProvider>
-        <Board />
-        <Toolbar />
-        <Toolbox />
-      </BoardContextProvider>
-    </ToolboxContextProvider>
+    <BrowserRouter>
+      <ToolboxContextProvider>
+        <BoardContextProvider>
+          <Routes>
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+          </Routes>
+        </BoardContextProvider>
+      </ToolboxContextProvider>
+    </BrowserRouter>
   );
 };
 

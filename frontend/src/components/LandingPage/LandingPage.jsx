@@ -1,69 +1,71 @@
-import React from "react";
+import React, { useContext, useState } from "react";
 import styles from "./LandingPage.module.css";
 import mockupImage from "../../assets/mockupImage.png";
-import { useState, useEffect } from "react";
+import AuthModal from "../AuthModal/AuthModal";
+import { BoardContext } from "../../store/BoardContext.jsx";
+import { Link, useNavigate } from "react-router-dom";
 
 const LandingPage = () => {
-  const [isLoggedin, setIsLoggedin] = useState(false);
-  const [userData, setUserData] = useState(null);
+  const {
+    setLoginStatusHandler,
+    setProfileHandler,
+    profile,
+    isLoggedIn,
+    logoutHandler,
+  } = useContext(BoardContext);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [clickedOn, setClikedOn] = useState("");
+  const navigate = useNavigate();
 
-  useEffect(() => {
-    // Check if user is logged in by making an API call to the backend
-    const checkLoginStatus = async () => {
-      try {
-        const response = await fetch("http://localhost:3030/api/user/profile", {
-          method: "GET",
-          credentials: "include", // Include cookies in the request
-        });
+  const loginClickHandler = () => {
+    setShowAuthModal(true);
+    setClikedOn("login");
+  };
+  const signupClickHandler = () => {
+    setShowAuthModal(true);
+    setClikedOn("signup");
+  };
 
-        if (response.ok) {
-          const data = await response.json();
-          setIsLoggedin(true);
-          setUserData(data.data); // Assuming the user data is in the 'data' field of the response
-        } else {
-          setIsLoggedin(false);
-          setUserData(null);
-        }
-      } catch (error) {
-        console.error("Error checking login status:", error);
-        setIsLoggedin(false);
-        setUserData(null);
-      }
-    };
+  const onclose = () => {
+    setClikedOn("");
+    setShowAuthModal(false);
+  };
 
-    checkLoginStatus();
-  }, []);
-  const loginClickHandler = () => {};
-  const signupClickHandler = () => {};
+  const changeClickedOn = (value) => {
+    setClikedOn(value);
+  };
+  const startButtonHandler = () => {
+    isLoggedIn
+      ? navigate("/dashboard")
+      : (setShowAuthModal(true), setClikedOn("login"));
+  };
+
   return (
     <>
       <div className={styles.container}>
         {/* Header / Navigation */}
         <header className={styles.header}>
-          <a href="/" className={styles.logo}>
+          <Link to="/" className={styles.logo}>
             BoardFlow
-          </a>
+          </Link>
           <div className={styles.navButtons}>
-            {isLoggedin ? (
-              <div>
-                <span>Welcome, {userData?.name || "User"}!</span>
-                <button className={styles.logoutBtn}>Log Out</button>
+            {isLoggedIn ? (
+              <div className={styles.userActions}>
+                <span className={styles.welcomeText}>
+                  Welcome, {profile?.username?.toUpperCase() || "JI"}!
+                </span>
+                <button className={styles.logoutBtn} onClick={logoutHandler}>
+                  Log Out
+                </button>
               </div>
             ) : (
               <>
-                <button
-                  className={styles.loginBtn}
-                  onClick={() => {
-                    loginClickHandler;
-                  }}
-                >
+                <button className={styles.loginBtn} onClick={loginClickHandler}>
                   Log In
                 </button>
                 <button
                   className={styles.signupBtn}
-                  onClick={() => {
-                    signupClickHandler;
-                  }}
+                  onClick={signupClickHandler}
                 >
                   Sign Up Free
                 </button>
@@ -82,14 +84,16 @@ const LandingPage = () => {
             The modern whiteboard for teams that move fast. Brainstorm, plan,
             and execute your ideas on an infinite, real-time canvas.
           </p>
-          <button className={styles.ctaBtn}>Start Whiteboarding</button>
+          <button className={styles.ctaBtn} onClick={startButtonHandler}>
+            Start Whiteboarding
+          </button>
 
           {/* App Mockup / Visual Placeholder */}
           <div className={styles.heroImagePlaceholder}>
             <img
               src={mockupImage}
               alt="BoardFlow App Mockup"
-              className={styles.mockupImage}
+              className={styles.mockupImg}
             />
           </div>
         </section>
@@ -135,7 +139,14 @@ const LandingPage = () => {
         </footer>
       </div>
       <div>
-        <AuthModal />
+        <AuthModal
+          clickedOn={clickedOn}
+          showAuthModal={showAuthModal}
+          onClose={onclose}
+          changeClickedOn={changeClickedOn}
+          setLoginStatusHandler={setLoginStatusHandler}
+          setProfileHandler={setProfileHandler}
+        />
       </div>
     </>
   );
