@@ -4,7 +4,7 @@ import { useContext } from "react";
 import { BoardContext } from "../../store/BoardContext";
 export default function Sidebar() {
   const [open, setOpen] = useState(false);
-  const { profile } = useContext(BoardContext);
+  const { profile, logoutHandler } = useContext(BoardContext);
   console.log(profile);
   let name = profile?.username;
   //correct this
@@ -28,13 +28,16 @@ export default function Sidebar() {
           </button>
         </div>
 
-        <div className={styles.content}>
-          <input placeholder="Username" />
-          <input placeholder="Email" type="email" />
-        </div>
+        <div className={styles.divider} />
+
+        <div className={styles.canvasListArea}></div>
+
+        <div className={styles.divider} />
 
         <div className={styles.footer}>
-          <button className={styles.save}>Save changes</button>
+          <button className={styles.save} onClick={logoutHandler}>
+            LogOut
+          </button>
         </div>
       </div>
     </>
