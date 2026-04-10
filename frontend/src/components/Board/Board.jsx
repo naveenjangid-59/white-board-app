@@ -26,11 +26,10 @@ const Board = () => {
     boardActionType,
     boardRedoHandler,
     boardUndoHandler,
-    canvasId,
-    setElementsHandler,
   } = useContext(BoardContext);
 
   const safeElements = Array.isArray(elements) ? elements : [];
+  const { id } = useParams();
 
   const drawBoard = useCallback(() => {
     const canvas = boardCanvasRef.current;
@@ -130,9 +129,9 @@ const Board = () => {
   const onSaveHandler = async () => {
     try {
       setIsSaving(true);
-      console.log("Saving canvas with id:", canvasId);
+      console.log("Saving canvas with id:", id);
       await api.put("/canvases/update", {
-        canvasId,
+        canvasId: id,
         elements: safeElements,
       });
       setIsSaving(false);
