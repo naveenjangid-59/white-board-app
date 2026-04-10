@@ -21,9 +21,6 @@ function Dashboard() {
   return (
     <>
       <Sidebar />
-      <Board />
-      <Toolbar />
-      <Toolbox />
     </>
   );
 }

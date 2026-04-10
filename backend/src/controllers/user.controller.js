@@ -101,8 +101,8 @@ const login = async (req, res) => {
     await user.save();
 
     const options = {
-      httpOnly: true, // Accessible only by the web server (not by JavaScript)
-      secure: true, // Only send the cookie over HTTPS
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production", // ← was always true
     };
 
     const safeUser = await User.findById(user._id).select(
@@ -181,7 +181,7 @@ const refreshAccessToken = async (req, res) => {
 
     const options = {
       httpOnly: true,
-      secure: true,
+      secure: process.env.NODE_ENV === "production", // ← was always true
       sameSite: "strict",
     };
 
@@ -209,7 +209,7 @@ const logout = async (req, res) => {
 
     const options = {
       httpOnly: true,
-      secure: true,
+      secure: process.env.NODE_ENV === "production", // ← was always true
     };
 
     console.log("User logged out successfully");

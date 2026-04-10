@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Dashboard from "./components/Dashboard/Dashboard";
 import { BoardContextProvider } from "./store/BoardContext.jsx";
 import { ToolboxContextProvider } from "./store/ToolboxContext.jsx";
+import Canvas from "./components/Canvas/Canvas.jsx";
 const App = () => {
   return (
     <BrowserRouter>
@@ -12,6 +13,7 @@ const App = () => {
           <Routes>
             <Route path="/" element={<LandingPage />} />
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/canvas/:id" element={<Canvas />} />
           </Routes>
         </BoardContextProvider>
       </ToolboxContextProvider>

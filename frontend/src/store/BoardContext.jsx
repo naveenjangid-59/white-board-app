@@ -35,6 +35,10 @@ export const BoardContext = createContext({
   setProfileHandler: () => {},
   logoutHandler: () => {},
   authLoading: false,
+  canvases: [],
+  setElementsHandler: () => {},
+  canvasId: null,
+  changeCanvasIdHandler: () => {},
 });
 
 function boardReducer(state, action) {
@@ -115,7 +119,7 @@ function boardReducer(state, action) {
       const newElement = getElement(id, x1, y1, x2, y2, {
         activeToolItem: state.activeToolItem,
         stroke,
-        fill,
+        fill: fill || "transparent",
         size,
       });
       // console.log("MOUSE_DOWN", newElement);
@@ -166,7 +170,6 @@ function boardReducer(state, action) {
       anchor.download = `whiteboard-${Date.now()}.png`;
       anchor.click();
     }
-
     case BOARD_ACTIONS.SET_PROFILE: {
       return { ...state, profile: action.payload };
     }
@@ -174,7 +177,22 @@ function boardReducer(state, action) {
       return { ...state, isLoggedIn: action.payload };
     }
     case BOARD_ACTIONS.LOGOUT: {
-      return { ...state, profile: null, isLoggedIn: false };
+      return { ...state, profile: null, isLoggedIn: false, canvases: [] };
+    }
+    case BOARD_ACTIONS.SET_CANVASES: {
+      return { ...state, canvases: action.payload };
+    }
+    case BOARD_ACTIONS.SET_ELEMENTS: {
+      return {
+        ...state,
+        elements: Array.isArray(action.payload) ? action.payload : [],
+      };
+    }
+    case BOARD_ACTIONS.CHANGE_CANVAS_ID: {
+      return {
+        ...state,
+        canvasId: action.payload,
+      };
     }
     default: {
       return state;
@@ -190,6 +208,8 @@ const initialBoardState = {
   boardActionType: BOARD_ACTION_TYPE.NONE,
   profile: null,
   isLoggedIn: false,
+  canvases: [],
+  canvasId: null,
 };
 
 function BoardContextProvider({ children }) {
@@ -200,6 +220,20 @@ function BoardContextProvider({ children }) {
   const [authLoading, setAuthLoading] = useState(true);
   const navigate = useNavigate();
   const { toolboxState } = useContext(ToolboxContext);
+
+  const changeCanvasIdHandler = (canvasId) => {
+    dispatchBoardAction({
+      type: BOARD_ACTIONS.CHANGE_CANVAS_ID,
+      payload: canvasId,
+    });
+  };
+
+  const setElementsHandler = (elements) => {
+    dispatchBoardAction({
+      type: BOARD_ACTIONS.SET_ELEMENTS,
+      payload: elements,
+    });
+  };
 
   const setProfileHandler = (data) => {
     const normalizedProfile = data?.data?.user || data?.data || data || null;
@@ -313,6 +347,13 @@ function BoardContextProvider({ children }) {
     dispatchBoardAction({ type: BOARD_ACTIONS.DOWNLOAD });
   };
 
+  const setCanvasesHandler = (canvases) => {
+    dispatchBoardAction({
+      type: BOARD_ACTIONS.SET_CANVASES,
+      payload: canvases,
+    });
+  };
+
   useEffect(() => {
     let mounted = true;
 
@@ -340,6 +381,32 @@ function BoardContextProvider({ children }) {
     };
   }, []);
 
+  useEffect(() => {
+    let mounted = true;
+
+    const getCanvases = async () => {
+      if (!state.isLoggedIn) {
+        setCanvasesHandler([]);
+        return;
+      }
+
+      try {
+        const res = await api.get("/canvases");
+        if (!mounted) return;
+
+        setCanvasesHandler(res?.data?.data || []);
+      } catch (_) {
+        if (!mounted) return;
+        setCanvasesHandler([]);
+      }
+    };
+    getCanvases();
+
+    return () => {
+      mounted = false;
+    };
+  }, [state.isLoggedIn]);
+
   const contextValue = {
     activeToolItem: state.activeToolItem,
     elements: state.elements,
@@ -358,6 +425,10 @@ function BoardContextProvider({ children }) {
     isLoggedIn: state.isLoggedIn,
     authLoading,
     logoutHandler,
+    canvases: state.canvases,
+    setElementsHandler,
+    canvasId: state.canvasId,
+    changeCanvasIdHandler,
   };
 
   return (

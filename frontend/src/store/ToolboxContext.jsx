@@ -52,7 +52,7 @@ function toolboxReducer(state, action) {
         ...state,
         [tool]: {
           ...state[tool],
-          fill: COLORS[color] || color,
+          fill: COLORS[color] ?? color,
         },
       };
     }

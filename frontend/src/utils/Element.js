@@ -15,7 +15,7 @@ function getElement(
   let options = {
     seed: id + 1,
     stroke,
-    fill,
+    fill: fill || "transparent",
     strokeWidth: size,
   };
   const newElement = {

@@ -64,9 +64,6 @@ const Toolbox = () => {
                   style={{
                     backgroundColor: toolboxState[activeToolItem]?.fill,
                   }}
-                  onClick={() =>
-                    changeFillColorHandler(activeToolItem, "BLACK")
-                  }
                 >
                   <GiCrossMark />
                 </div>

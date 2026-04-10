@@ -4,18 +4,19 @@ import React, {
   useEffect,
   useLayoutEffect,
   useRef,
+  useState,
 } from "react";
 import { BoardContext } from "@/store/BoardContext";
 import rough from "roughjs";
-import { useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { TOOLS, BOARD_ACTION_TYPE } from "@/Constants";
 import styles from "./Board.module.css";
+import api from "../../Api";
 
 const Board = () => {
   const textAreaRef = useRef();
   const boardCanvasRef = useRef();
-  const navigate = useNavigate();
-
+  const [isSaving, setIsSaving] = useState(false);
   const {
     boardMouseDownHandler,
     boardMouseMoveHandler,
@@ -25,10 +26,11 @@ const Board = () => {
     boardActionType,
     boardRedoHandler,
     boardUndoHandler,
-    profile,
-    setLoginStatusHandler,
-    setProfileHandler,
+    canvasId,
+    setElementsHandler,
   } = useContext(BoardContext);
+
+  const safeElements = Array.isArray(elements) ? elements : [];
 
   const drawBoard = useCallback(() => {
     const canvas = boardCanvasRef.current;
@@ -60,7 +62,7 @@ const Board = () => {
 
     const roughCanvas = rough.canvas(canvas);
 
-    elements.forEach((element) => {
+    safeElements.forEach((element) => {
       switch (element.type) {
         case TOOLS.TEXT: {
           ctx.textBaseline = "top";
@@ -85,7 +87,7 @@ const Board = () => {
           break;
       }
     });
-  }, [elements]);
+  }, [safeElements]);
 
   //draw on mount+when elements change
   useLayoutEffect(() => {
@@ -123,10 +125,33 @@ const Board = () => {
     }
   }, [boardActionType]);
 
-  const lastElement = elements[elements.length - 1];
+  const lastElement = safeElements[safeElements.length - 1];
 
+  const onSaveHandler = async () => {
+    try {
+      setIsSaving(true);
+      console.log("Saving canvas with id:", canvasId);
+      await api.put("/canvases/update", {
+        canvasId,
+        elements: safeElements,
+      });
+      setIsSaving(false);
+    } catch (error) {
+      console.error("Error saving canvas:", error);
+      setIsSaving(false);
+    }
+  };
   return (
     <>
+      <button
+        type="button"
+        className={styles.saveBtn}
+        onClick={onSaveHandler}
+        disabled={isSaving}
+      >
+        {isSaving ? "...Saving" : "Save"}
+      </button>
+
       {boardActionType === BOARD_ACTION_TYPE.WRITING && (
         <textarea
           name="textarea"

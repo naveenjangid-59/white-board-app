@@ -64,3 +64,64 @@ canvas {
   outline: none;
   box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.3);
 }
+
+.saveBtn {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1100;
+
+  min-width: 112px;
+  padding: 0.62rem 1.1rem;
+  border: 1px solid #4338ca;
+  border-radius: 999px;
+
+  background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+  color: #ffffff;
+  font-size: 0.92rem;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+
+  cursor: pointer;
+  box-shadow:
+    0 8px 20px rgba(67, 56, 202, 0.25),
+    0 2px 6px rgba(15, 23, 42, 0.12);
+
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.2s ease,
+    opacity 0.2s ease,
+    filter 0.2s ease;
+}
+
+.saveBtn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow:
+    0 12px 26px rgba(67, 56, 202, 0.3),
+    0 4px 10px rgba(15, 23, 42, 0.15);
+  filter: brightness(1.03);
+}
+
+.saveBtn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.saveBtn:focus-visible {
+  outline: 3px solid rgba(79, 70, 229, 0.28);
+  outline-offset: 2px;
+}
+
+.saveBtn:disabled {
+  cursor: not-allowed;
+  opacity: 0.72;
+}
+
+@media (max-width: 768px) {
+  .saveBtn {
+    top: 14px;
+    right: 14px;
+    min-width: 104px;
+    padding: 0.56rem 0.92rem;
+    font-size: 0.84rem;
+  }
+}
