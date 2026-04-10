@@ -28,33 +28,12 @@
   cursor: pointer;
 }
 
-.createBtn:hover {
-  background: #4338ca;
-}
-
-/* Table */
-.tableWrapper {
-  overflow-x: auto;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-}
-
-.table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.table thead {
-  background: #f1f5f9;
-}
-
-.table th {
-  text-align: left;
-  padding: 14px;
-  font-size: 0.85rem;
-  color: #64748b;
-  font-weight: 600;
+/* Content */
+.content {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
 }
 
 .table td {
@@ -68,18 +47,18 @@
   color: #1e293b;
 }
 
-/* Actions */
-.openBtn {
-  background: #e0e7ff;
-  color: #4338ca;
-  padding: 6px 10px;
-  border-radius: 8px;
-  border: none;
-  font-weight: 600;
-  cursor: pointer;
+.content input::placeholder {
+  color: #9ca3af;
 }
 
-.buttonContainer {
+.content input:focus {
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+}
+
+/* Footer */
+.footer {
+  margin-top: auto;
   display: flex;
   gap: 10px;
   flex-direction: row;
