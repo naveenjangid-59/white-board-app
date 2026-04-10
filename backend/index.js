@@ -8,13 +8,14 @@ import canvasRoutes from "./src/routes/canvas.route.js";
 const app = express();
 dotenv.config();
 const PORT = process.env.PORT;
-app.use(express.json()); //the data is JSON on the client side , But when it travels over HTTP, it becomes raw text (string), so we parse it into json here
 app.use(
   cors({
     origin: "http://localhost:5173",
     credentials: true,
   }),
 );
+app.use(express.json({ limit: "10mb" })); //the data is JSON on the client side , But when it travels over HTTP, it becomes raw text (string), so we parse it into json here
+app.use(express.urlencoded({ limit: "10mb", extended: true }));
 
 connectDB();
 app.use(cookieParser());

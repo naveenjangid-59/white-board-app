@@ -429,6 +429,7 @@ function BoardContextProvider({ children }) {
     setElementsHandler,
     canvasId: state.canvasId,
     changeCanvasIdHandler,
+    setCanvasesHandler,
   };
 
   return (

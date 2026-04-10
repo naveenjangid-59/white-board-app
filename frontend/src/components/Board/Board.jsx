@@ -8,15 +8,17 @@ import React, {
 } from "react";
 import { BoardContext } from "@/store/BoardContext";
 import rough from "roughjs";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { TOOLS, BOARD_ACTION_TYPE } from "@/Constants";
 import styles from "./Board.module.css";
 import api from "../../Api";
+import { set } from "react-hook-form";
 
 const Board = () => {
   const textAreaRef = useRef();
   const boardCanvasRef = useRef();
   const [isSaving, setIsSaving] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
   const {
     boardMouseDownHandler,
     boardMouseMoveHandler,
@@ -26,10 +28,29 @@ const Board = () => {
     boardActionType,
     boardRedoHandler,
     boardUndoHandler,
+    setElementsHandler,
   } = useContext(BoardContext);
 
   const safeElements = Array.isArray(elements) ? elements : [];
   const { id } = useParams();
+
+  useEffect(() => {
+    async function fetchCanvas() {
+      if (!id) return;
+
+      try {
+        const res = await api.get(`/canvases/load/${id}`);
+        const canvasData = res?.data?.data;
+
+        setElementsHandler(canvasData?.elements || []);
+        setIsLoaded(true);
+      } catch (err) {
+        console.error("Failed to fetch canvas");
+      }
+    }
+
+    fetchCanvas();
+  }, [id]);
 
   const drawBoard = useCallback(() => {
     const canvas = boardCanvasRef.current;
@@ -126,31 +147,30 @@ const Board = () => {
 
   const lastElement = safeElements[safeElements.length - 1];
 
-  const onSaveHandler = async () => {
-    try {
-      setIsSaving(true);
-      console.log("Saving canvas with id:", id);
-      await api.put("/canvases/update", {
-        canvasId: id,
-        elements: safeElements,
-      });
-      setIsSaving(false);
-    } catch (error) {
-      console.error("Error saving canvas:", error);
-      setIsSaving(false);
-    }
-  };
+  useEffect(() => {
+    if (!id || !isLoaded) return;
+
+    const timeout = setTimeout(async () => {
+      try {
+        setIsSaving(true);
+        await api.put("/canvases/update", {
+          canvasId: id,
+          elements: safeElements,
+        });
+        console.log("Canvas saved");
+        setIsSaving(false);
+      } catch (error) {
+        console.error("Failed to save canvas");
+        setIsSaving(false);
+      }
+    }, 1000);
+
+    return () => clearTimeout(timeout);
+  }, [safeElements, id, isLoaded]);
+  const navigate = useNavigate();
   return (
     <>
-      <button
-        type="button"
-        className={styles.saveBtn}
-        onClick={onSaveHandler}
-        disabled={isSaving}
-      >
-        {isSaving ? "...Saving" : "Save"}
-      </button>
-
+      <p className={styles.saveStatus}>{isSaving ? "Saving..." : "Saved"}</p>
       {boardActionType === BOARD_ACTION_TYPE.WRITING && (
         <textarea
           name="textarea"
@@ -197,6 +217,14 @@ const Board = () => {
         onPointerMove={boardMouseMoveHandler}
         onPointerUp={boardMouseUpHandler}
       ></canvas>
+      <button
+        className={styles.dashboardBtn}
+        onClick={() => {
+          navigate("/dashboard");
+        }}
+      >
+        Go to Dashboard
+      </button>
     </>
   );
 };

@@ -7,10 +7,19 @@ import { useCallback } from "react";
 import { set } from "react-hook-form";
 function Siderbar() {
   const navigate = useNavigate();
-  const { logoutHandler, setElementsHandler, changeCanvasIdHandler, profile } =
-    useContext(BoardContext);
+  const {
+    logoutHandler,
+    setElementsHandler,
+    changeCanvasIdHandler,
+    profile,
+    canvases,
+    setCanvasesHandler,
+  } = useContext(BoardContext);
+  const [showModal, setShowModal] = useState(false);
+  const [modalType, setModalType] = useState(""); // create | delete
+  const [inputValue, setInputValue] = useState("");
+  const [selectedId, setSelectedId] = useState(null);
 
-  const [canvases, setCanvases] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -20,18 +29,19 @@ function Siderbar() {
       setError("");
       setIsLoading(true);
       const res = await api.get("/canvases");
-      setCanvases(Array.isArray(res?.data?.data) ? res.data.data : []);
+
+      setCanvasesHandler(res?.data?.data || []);
     } catch (err) {
       setError(err?.response?.data?.message || "Unable to fetch canvases");
-      setCanvases([]);
+      setCanvasesHandler([]);
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [setCanvasesHandler]);
 
   useEffect(() => {
     fetchCanvases();
-  }, [fetchCanvases]);
+  }, []);
 
   const tableRows = useMemo(() => {
     return canvases.map((canvas) => ({
@@ -58,31 +68,9 @@ function Siderbar() {
     });
   };
 
-  const handleCreateCanvas = async () => {
-    const name = window.prompt("Enter canvas name");
-    if (!name?.trim()) return;
-
-    try {
-      setIsSubmitting(true);
-      setError("");
-      const res = await api.post("/canvases/create-canvas", {
-        name: name.trim(),
-      });
-
-      const createdCanvasId = res?.data?.data?._id;
-      if (createdCanvasId) {
-        changeCanvasIdHandler(createdCanvasId);
-        setElementsHandler([]);
-        navigate(`/canvas/${createdCanvasId}`);
-        return;
-      }
-
-      await fetchCanvases();
-    } catch (err) {
-      setError(err?.response?.data?.message || "Unable to create canvas");
-    } finally {
-      setIsSubmitting(false);
-    }
+  const handleCreateCanvas = () => {
+    setModalType("create");
+    setShowModal(true);
   };
 
   const handleOpenCanvas = async (canvasId) => {
@@ -103,35 +91,54 @@ function Siderbar() {
     }
   };
 
-  const handleDeleteCanvas = async (canvasId) => {
-    const isConfirmed = window.confirm(
-      "Are you sure you want to delete this canvas?",
-    );
-    if (!isConfirmed) return;
+  const handleDeleteCanvas = (canvasId) => {
+    setModalType("delete");
+    setSelectedId(canvasId);
+    setShowModal(true);
+  };
 
+  const handleConfirm = async () => {
     try {
       setIsSubmitting(true);
       setError("");
-      await api.delete(`/canvases/delete/${canvasId}`);
-      setCanvases((prev) => prev.filter((canvas) => canvas?._id !== canvasId));
+
+      if (modalType === "create") {
+        if (!inputValue.trim()) return;
+
+        const res = await api.post("/canvases/create-canvas", {
+          name: inputValue.trim(),
+        });
+
+        const id = res?.data?.data?._id;
+
+        if (id) {
+          changeCanvasIdHandler(id);
+          setElementsHandler([]);
+          navigate(`/canvas/${id}`);
+        }
+      }
+
+      if (modalType === "delete") {
+        await api.delete(`/canvases/delete/${selectedId}`);
+
+        setCanvasesHandler(canvases.filter((c) => c._id !== selectedId));
+      }
     } catch (err) {
-      setError(err?.response?.data?.message || "Unable to delete canvas");
+      setError(err?.response?.data?.message || "Something went wrong");
     } finally {
+      setShowModal(false);
+      setInputValue("");
+      setSelectedId(null);
       setIsSubmitting(false);
     }
   };
-
-  useEffect(() => {
-    setElementsHandler([]);
-  }, []);
-
   return (
     <div className={styles.page}>
       <header className={styles.header}>
         <div>
           <h1 className={styles.title}>Your Canvases</h1>
           <p className={styles.subtitle}>
-            Manage, open, and continue your whiteboards.
+            {`Heyy ${profile?.username || "there"} ! Manage, open, and continue your whiteboards.`}
           </p>
         </div>
 
@@ -210,6 +217,37 @@ function Siderbar() {
           </div>
         )}
       </main>
+      {showModal && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modalBox}>
+            <h3>
+              {modalType === "create" ? "Create Canvas" : "Delete Canvas"}
+            </h3>
+
+            {/* INPUT ONLY FOR CREATE */}
+            {modalType === "create" && (
+              <input
+                type="text"
+                placeholder="Enter canvas name"
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                className={styles.input}
+              />
+            )}
+
+            {/* MESSAGE FOR DELETE */}
+            {modalType === "delete" && (
+              <p>Are you sure you want to delete this canvas?</p>
+            )}
+
+            <div className={styles.modalActions}>
+              <button onClick={() => setShowModal(false)}>Cancel</button>
+
+              <button onClick={handleConfirm}>Confirm</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

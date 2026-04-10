@@ -125,3 +125,37 @@ canvas {
     font-size: 0.84rem;
   }
 }
+
+.dashboardBtn {
+  position: fixed;
+  top: 25px;
+  left: 20px;
+  z-index: 1100;
+  min-width: 112px;
+  padding: 0.62rem 1.1rem;
+  border: 1px solid #000000;
+  border-radius: 9px;
+
+  background: linear-gradient(135deg, #d6d5ec 0%, #edebff 100%);
+  color: #000000;
+  font-size: 0.92rem;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+
+  cursor: pointer;
+  box-shadow:
+    0 8px 20px rgba(67, 56, 202, 0.25),
+    0 2px 6px rgba(15, 23, 42, 0.12);
+}
+
+.saveStatus {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  /* background: rgba(0, 0, 0, 0.6); */
+  color: rgb(134, 142, 255);
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  z-index: 1100;
+}
