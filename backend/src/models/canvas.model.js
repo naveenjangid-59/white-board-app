@@ -133,6 +133,40 @@ canvasSchema.statics.updateCanvas = async function (
   }
 };
 
+canvasSchema.statics.shareCanvas = async function (
+  canvasId,
+  ownerId,
+  shareWithEmail,
+) {
+  try {
+    const userToShareWith = await mongoose
+      .model("User")
+      .findOne({ email: shareWithEmail });
+    if (!userToShareWith) {
+      throw new ApiError(404, "User to share with not found");
+    }
+    // if already shared, i want to send res like "Canvas already shared with this user"
+    const existingShare = await this.findOne({
+      _id: canvasId,
+      owner: ownerId,
+      sharedWith: userToShareWith._id,
+    });
+    if (existingShare) {
+      throw new ApiError(409, "Canvas already shared with this user");
+    }
+    const canvas = await this.findOneAndUpdate(
+      { _id: canvasId, owner: ownerId }, // only owner can share the canvas
+      { $addToSet: { sharedWith: userToShareWith._id } }, // add to sharedWith array if not already present
+      { returnDocument: "after" }, // return updated doc, not old one
+    );
+  } catch (error) {
+    throw new ApiError(
+      error.statusCode || 500,
+      error.message || "Error sharing canvas",
+    );
+  }
+};
+
 const Canvas = mongoose.model("Canvas", canvasSchema);
 
 export default Canvas;

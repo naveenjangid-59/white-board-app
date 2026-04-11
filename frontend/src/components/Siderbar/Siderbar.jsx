@@ -1,12 +1,13 @@
-import { useContext, useEffect, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import styles from "./Sidebar.module.css";
 import api from "../../Api";
 import { BoardContext } from "../../store/BoardContext";
-import { useCallback } from "react";
-import { set } from "react-hook-form";
+import { toast } from "react-toastify";
+
 function Siderbar() {
   const navigate = useNavigate();
+
   const {
     logoutHandler,
     setElementsHandler,
@@ -15,8 +16,9 @@ function Siderbar() {
     canvases,
     setCanvasesHandler,
   } = useContext(BoardContext);
+
   const [showModal, setShowModal] = useState(false);
-  const [modalType, setModalType] = useState(""); // create | delete
+  const [modalType, setModalType] = useState(""); // create ,delete , share
   const [inputValue, setInputValue] = useState("");
   const [selectedId, setSelectedId] = useState(null);
 
@@ -29,7 +31,6 @@ function Siderbar() {
       setError("");
       setIsLoading(true);
       const res = await api.get("/canvases");
-
       setCanvasesHandler(res?.data?.data || []);
     } catch (err) {
       setError(err?.response?.data?.message || "Unable to fetch canvases");
@@ -68,8 +69,24 @@ function Siderbar() {
     });
   };
 
+  // ================= HANDLERS =================
+
   const handleCreateCanvas = () => {
     setModalType("create");
+    setInputValue("");
+    setShowModal(true);
+  };
+
+  const handleDeleteCanvas = (canvasId) => {
+    setModalType("delete");
+    setSelectedId(canvasId);
+    setShowModal(true);
+  };
+
+  const handleShareCanvas = (canvasId) => {
+    setModalType("share");
+    setSelectedId(canvasId);
+    setInputValue("");
     setShowModal(true);
   };
 
@@ -80,6 +97,7 @@ function Siderbar() {
 
       const res = await api.get(`/canvases/load/${canvasId}`);
       const canvasData = res?.data?.data;
+
       changeCanvasIdHandler(canvasId);
       setElementsHandler(canvasData?.elements || []);
 
@@ -91,47 +109,80 @@ function Siderbar() {
     }
   };
 
-  const handleDeleteCanvas = (canvasId) => {
-    setModalType("delete");
-    setSelectedId(canvasId);
-    setShowModal(true);
-  };
+  // ================= CONFIRM LOGIC =================
 
   const handleConfirm = async () => {
     try {
       setIsSubmitting(true);
       setError("");
 
+      // CREATE
       if (modalType === "create") {
         if (!inputValue.trim()) return;
 
         const res = await api.post("/canvases/create-canvas", {
           name: inputValue.trim(),
         });
-
+        if (!res?.data?.success) {
+          toast.error("Failed to create canvas");
+          return;
+        }
         const id = res?.data?.data?._id;
 
         if (id) {
           changeCanvasIdHandler(id);
           setElementsHandler([]);
           navigate(`/canvas/${id}`);
+          toast.success("Canvas created successfully");
         }
+
+        // close modal
+        setShowModal(false);
+        setInputValue("");
       }
 
+      // DELETE
       if (modalType === "delete") {
-        await api.delete(`/canvases/delete/${selectedId}`);
-
+        const res = await api.delete(`/canvases/delete/${selectedId}`);
+        const success = res?.data?.success;
+        if (!success) {
+          toast.error("Failed to delete canvas");
+          return;
+        }
         setCanvasesHandler(canvases.filter((c) => c._id !== selectedId));
+        toast.success("Canvas deleted successfully");
+        setShowModal(false);
+        setSelectedId(null);
+      }
+
+      // SHARE
+      if (modalType === "share") {
+        if (!inputValue.trim()) return;
+        console.log("Sharing canvas", selectedId, "with", inputValue.trim());
+        const res = await api.put("/canvases/share", {
+          canvasId: selectedId,
+          email: inputValue.trim(),
+        });
+        console.log("Share response:", res);
+        if (!res?.data?.success) {
+          toast.error("Failed to share canvas");
+          return;
+        }
+
+        // success message
+        toast.success("Canvas shared successfully");
+
+        setShowModal(false);
+        setInputValue("");
+        setSelectedId(null);
       }
     } catch (err) {
-      setError(err?.response?.data?.message || "Something went wrong");
+      toast.error(err?.message || "Action failed");
     } finally {
-      setShowModal(false);
-      setInputValue("");
-      setSelectedId(null);
       setIsSubmitting(false);
     }
   };
+
   return (
     <div className={styles.page}>
       <header className={styles.header}>
@@ -145,15 +196,14 @@ function Siderbar() {
         <div className={styles.headerActions}>
           <button
             className={styles.logoutBtn}
-            type="button"
             onClick={logoutHandler}
             disabled={isSubmitting}
           >
             Logout
           </button>
+
           <button
             className={styles.newBtn}
-            type="button"
             onClick={handleCreateCanvas}
             disabled={isSubmitting}
           >
@@ -183,6 +233,7 @@ function Siderbar() {
                   <th>Actions</th>
                 </tr>
               </thead>
+
               <tbody>
                 {tableRows.map((canvas) => (
                   <tr key={canvas.id}>
@@ -190,24 +241,35 @@ function Siderbar() {
                     <td>{canvas.createdBy || "—"}</td>
                     <td>{formatDate(canvas.createdOn)}</td>
                     <td>{formatDate(canvas.updatedOn)}</td>
+
                     <td>
                       <div className={styles.rowActions}>
                         <button
                           className={styles.openBtn}
-                          type="button"
                           onClick={() => handleOpenCanvas(canvas.id)}
                           disabled={isSubmitting}
                         >
                           Open
                         </button>
-                        <button
-                          className={styles.deleteBtn}
-                          type="button"
-                          onClick={() => handleDeleteCanvas(canvas.id)}
-                          disabled={isSubmitting}
-                        >
-                          Delete
-                        </button>
+
+                        {canvas.createdBy === profile?.username && (
+                          <>
+                            <button
+                              className={styles.deleteBtn}
+                              onClick={() => handleDeleteCanvas(canvas.id)}
+                              disabled={isSubmitting}
+                            >
+                              Delete
+                            </button>
+                            <button
+                              className={styles.shareBtn}
+                              onClick={() => handleShareCanvas(canvas.id)}
+                              disabled={isSubmitting}
+                            >
+                              Share
+                            </button>
+                          </>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -217,33 +279,48 @@ function Siderbar() {
           </div>
         )}
       </main>
+
+      {/* ================= MODAL ================= */}
       {showModal && (
         <div className={styles.modalOverlay}>
           <div className={styles.modalBox}>
             <h3>
-              {modalType === "create" ? "Create Canvas" : "Delete Canvas"}
+              {modalType === "create"
+                ? "Create Canvas"
+                : modalType === "delete"
+                  ? "Delete Canvas"
+                  : "Share Canvas"}
             </h3>
 
-            {/* INPUT ONLY FOR CREATE */}
-            {modalType === "create" && (
+            {/* INPUT */}
+            {(modalType === "create" || modalType === "share") && (
               <input
-                type="text"
-                placeholder="Enter canvas name"
+                type={modalType === "share" ? "email" : "text"}
+                placeholder={
+                  modalType === "share"
+                    ? "Enter user email"
+                    : "Enter canvas name"
+                }
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 className={styles.input}
               />
             )}
 
-            {/* MESSAGE FOR DELETE */}
+            {/* DELETE TEXT */}
             {modalType === "delete" && (
               <p>Are you sure you want to delete this canvas?</p>
             )}
 
+            {/* ERROR */}
+            {error && <div className={styles.error}>{error}</div>}
+
             <div className={styles.modalActions}>
               <button onClick={() => setShowModal(false)}>Cancel</button>
 
-              <button onClick={handleConfirm}>Confirm</button>
+              <button onClick={handleConfirm} disabled={isSubmitting}>
+                Confirm
+              </button>
             </div>
           </div>
         </div>

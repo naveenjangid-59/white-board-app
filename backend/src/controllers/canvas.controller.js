@@ -117,4 +117,43 @@ const updateCanvas = async (req, res) => {
   }
 };
 
-export { getAllCanvases, createCanvas, getCanvas, deleteCanvas, updateCanvas };
+const shareCanvas = async (req, res) => {
+  try {
+    console.log("Received share canvas request with body:", req.body);
+    const { canvasId, email: shareWithEmail } = req.body;
+    const ownerId = req.user._id;
+    console.log("Sharing canvas", canvasId, "with", shareWithEmail);
+    if (!canvasId || !shareWithEmail) {
+      throw new ApiError(400, "Canvas ID and email are required");
+    }
+
+    const updatedCanvas = await Canvas.shareCanvas(
+      canvasId,
+      ownerId,
+      shareWithEmail,
+    );
+
+    return res
+      .status(200)
+      .json(new ApiResponse(200, updatedCanvas, "Canvas shared successfully"));
+  } catch (error) {
+    console.error("Error sharing canvas:", error);
+    return res
+      .status(error.statusCode || 500)
+      .json(
+        new ApiError(
+          error.statusCode || 500,
+          error.message || "Error sharing canvas",
+        ),
+      );
+  }
+};
+
+export {
+  getAllCanvases,
+  createCanvas,
+  getCanvas,
+  deleteCanvas,
+  updateCanvas,
+  shareCanvas,
+};

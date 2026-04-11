@@ -91,7 +91,7 @@ export const isPointNearElement = (element, pointX, pointY) => {
         isPointCloseToLine(x2, y1, x2, y2, pointX, pointY, 1) ||
         isPointCloseToLine(x2, y2, x1, y2, pointX, pointY, 1) ||
         isPointCloseToLine(x1, y2, x1, y1, pointX, pointY, 1) ||
-        (fill !== "" &&
+        (fill !== "transparent" &&
           pointX <= Math.max(x1, x2) &&
           pointX >= Math.min(x1, x2) &&
           pointY <= Math.max(y1, y2) &&
