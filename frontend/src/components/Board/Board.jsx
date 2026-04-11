@@ -12,7 +12,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { TOOLS, BOARD_ACTION_TYPE } from "@/Constants";
 import styles from "./Board.module.css";
 import api from "../../Api";
-import { set } from "react-hook-form";
+import { hydrateElement } from "@/utils/Element";
 
 const Board = () => {
   const textAreaRef = useRef();
@@ -42,7 +42,11 @@ const Board = () => {
         const res = await api.get(`/canvases/load/${id}`);
         const canvasData = res?.data?.data;
 
-        setElementsHandler(canvasData?.elements || []);
+        const hydratedElements = Array.isArray(canvasData?.elements)
+          ? canvasData.elements.map(hydrateElement)
+          : [];
+
+        setElementsHandler(hydratedElements);
         setIsLoaded(true);
       } catch (err) {
         console.error("Failed to fetch canvas");
@@ -97,7 +101,9 @@ const Board = () => {
         case TOOLS.RECTANGLE:
         case TOOLS.CIRCLE:
         case TOOLS.ARROW:
-          roughCanvas.draw(element.roughElement);
+          if (element?.roughElement) {
+            roughCanvas.draw(element.roughElement);
+          }
           break;
         case TOOLS.PEN:
           ctx.fillStyle = element.stroke;

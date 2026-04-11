@@ -4,6 +4,81 @@ import { getArrowHeadsCoordinates, getDrawablePoints } from "./Math.js";
 const generator = rough.generator();
 import { getSvgPathFromStroke } from "./svgPathFromStroke.js";
 import { getStroke } from "perfect-freehand";
+
+function hydrateElement(element) {
+  if (!element || typeof element !== "object") return element;
+
+  switch (element.type) {
+    case TOOLS.PEN: {
+      const points = Array.isArray(element.points) ? element.points : [];
+      return {
+        ...element,
+        path: new Path2D(
+          getSvgPathFromStroke(getStroke(points, { size: element.size ?? 1 })),
+        ),
+      };
+    }
+    case TOOLS.LINE:
+      return {
+        ...element,
+        roughElement: generator.line(
+          element.x1,
+          element.y1,
+          element.x2,
+          element.y2,
+          element.options,
+        ),
+      };
+    case TOOLS.RECTANGLE:
+      return {
+        ...element,
+        roughElement: generator.rectangle(
+          element.x1,
+          element.y1,
+          element.x2 - element.x1,
+          element.y2 - element.y1,
+          element.options,
+        ),
+      };
+    case TOOLS.CIRCLE:
+      return {
+        ...element,
+        roughElement: generator.ellipse(
+          (element.x1 + element.x2) / 2,
+          (element.y1 + element.y2) / 2,
+          element.x2 - element.x1,
+          element.y2 - element.y1,
+          element.options,
+        ),
+      };
+    case TOOLS.ARROW: {
+      const { x3, y3, x4, y4 } = getArrowHeadsCoordinates(
+        element.x1,
+        element.x2,
+        element.y1,
+        element.y2,
+        ARROW_LENGTH,
+      );
+      const points = getDrawablePoints(
+        element.x1,
+        element.y1,
+        element.x2,
+        element.y2,
+        x3,
+        y3,
+        x4,
+        y4,
+      );
+      return {
+        ...element,
+        roughElement: generator.linearPath(points, element.options),
+      };
+    }
+    default:
+      return element;
+  }
+}
+
 function getElement(
   id,
   x1,
@@ -149,4 +224,4 @@ function getLastElement(lastElement, x2, y2, { activeToolItem }) {
   return ele;
 }
 
-export { getElement, getLastElement };
+export { getElement, getLastElement, hydrateElement };

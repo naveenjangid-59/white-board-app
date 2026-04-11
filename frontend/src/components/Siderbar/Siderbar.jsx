@@ -157,7 +157,7 @@ function Siderbar() {
             onClick={handleCreateCanvas}
             disabled={isSubmitting}
           >
-            New Canvas
+            + New Canvas
           </button>
         </div>
       </header>
