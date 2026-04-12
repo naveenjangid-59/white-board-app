@@ -12,10 +12,13 @@ import User from "./src/models/user.model.js";
 import Canvas from "./src/models/canvas.model.js";
 dotenv.config();
 const app = express();
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 3030;
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: [
+      "http://localhost:5173",
+      "https://white-board-app-3n4r.vercel.app",
+    ],
     credentials: true,
   }),
 );
@@ -32,7 +35,10 @@ const server = http.createServer(app);
 // Attach Socket.IO to the server
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:5173",
+    origin: [
+      "http://localhost:5173",
+      "https://white-board-app-3n4r.vercel.app",
+    ],
     credentials: true,
   },
 });
