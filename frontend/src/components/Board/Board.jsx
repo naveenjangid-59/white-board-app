@@ -12,6 +12,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { TOOLS, BOARD_ACTION_TYPE } from "@/Constants";
 import styles from "./Board.module.css";
 import api from "../../Api";
+import { io } from "socket.io-client";
 import { hydrateElement } from "@/utils/Element";
 
 const Board = () => {
@@ -33,7 +34,11 @@ const Board = () => {
 
   const safeElements = Array.isArray(elements) ? elements : [];
   const { id } = useParams();
+  const socketRef = useRef(null);
+  const isRemoteUpdateRef = useRef(false);
+  const skipSaveRef = useRef(false);
 
+  // fetch canvas data on mount and when id changes
   useEffect(() => {
     async function fetchCanvas() {
       if (!id) return;
@@ -46,6 +51,8 @@ const Board = () => {
           ? canvasData.elements.map(hydrateElement)
           : [];
 
+        // Hydrating from DB should not trigger an immediate save.
+        skipSaveRef.current = true;
         setElementsHandler(hydratedElements);
         setIsLoaded(true);
       } catch (err) {
@@ -55,6 +62,38 @@ const Board = () => {
 
     fetchCanvas();
   }, [id]);
+
+  // establish socket connection for real-time updates + join canvas room
+  useEffect(() => {
+    if (!id) return;
+
+    const socket = io("http://localhost:3030", {
+      withCredentials: true,
+    });
+
+    socketRef.current = socket;
+
+    socket.emit("joinCanvas", id); // joins room
+
+    return () => socket.disconnect();
+  }, [id]);
+
+  // when i draw on canvas, emmit event with new elements
+  useEffect(() => {
+    if (!socketRef.current || !isLoaded || !id) return;
+
+    // Prevent re-broadcasting updates that originated from another user.
+    if (isRemoteUpdateRef.current) {
+      isRemoteUpdateRef.current = false;
+      return;
+    }
+
+    socketRef.current.emit("draw", {
+      canvasId: id,
+      senderId: socketRef.current.id,
+      elements: safeElements,
+    });
+  }, [safeElements, id, isLoaded]);
 
   const drawBoard = useCallback(() => {
     const canvas = boardCanvasRef.current;
@@ -115,6 +154,28 @@ const Board = () => {
     });
   }, [safeElements]);
 
+  // when other users draw, update canvas
+  useEffect(() => {
+    if (!socketRef.current) return;
+
+    const handler = (data) => {
+      const { senderId, elements } = data;
+      if (senderId === socketRef.current.id) return; // ignore own events
+
+      isRemoteUpdateRef.current = true;
+      // Remote updates should not trigger autosave on this client.
+      skipSaveRef.current = true;
+      const hydrated = Array.isArray(elements)
+        ? elements.map(hydrateElement)
+        : [];
+      setElementsHandler(hydrated);
+    };
+    socketRef.current.on("draw", handler);
+    return () => {
+      socketRef.current.off("draw", handler);
+    };
+  }, [id, setElementsHandler]);
+
   //draw on mount+when elements change
   useLayoutEffect(() => {
     drawBoard();
@@ -155,6 +216,11 @@ const Board = () => {
 
   useEffect(() => {
     if (!id || !isLoaded) return;
+
+    if (skipSaveRef.current) {
+      skipSaveRef.current = false;
+      return;
+    }
 
     const timeout = setTimeout(async () => {
       try {
