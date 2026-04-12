@@ -100,9 +100,12 @@ const login = async (req, res) => {
     user.refreshToken = refreshToken;
     await user.save();
 
+    const isProduction = process.env.NODE_ENV === "production";
+
     const options = {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production", // ← was always true
+      secure: isProduction,
+      sameSite: isProduction ? "none" : "lax",
     };
 
     const safeUser = await User.findById(user._id).select(
@@ -179,10 +182,12 @@ const refreshAccessToken = async (req, res) => {
 
     await user.save({ validateBeforeSave: false });
 
+    const isProduction = process.env.NODE_ENV === "production";
+
     const options = {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production", // ← was always true
-      sameSite: "strict",
+      secure: isProduction,
+      sameSite: isProduction ? "none" : "lax",
     };
 
     // send new tokens
@@ -207,9 +212,12 @@ const logout = async (req, res) => {
     user.refreshToken = undefined;
     await user.save({ validateBeforeSave: false });
 
+    const isProduction = process.env.NODE_ENV === "production";
+
     const options = {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production", // ← was always true
+      secure: isProduction,
+      sameSite: isProduction ? "none" : "lax",
     };
 
     console.log("User logged out successfully");
