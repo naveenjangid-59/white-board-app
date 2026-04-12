@@ -97,11 +97,26 @@ canvasSchema.statics.getCanvas = async function (canvasId, userId) {
 
 canvasSchema.statics.deleteCanvas = async function (canvasId, userId) {
   try {
-    const result = await this.deleteOne({
-      _id: canvasId,
-      owner: userId, // only owner can delete the canvas
-    });
-    return result.deletedCount > 0; // return true if a canvas was deleted
+    // if user is not owner, then remove him from sharedWith array, if user is owner, then delete the canvas
+    const canvas = await this.findOne({ _id: canvasId });
+    if (!canvas) {
+      throw new ApiError(404, "Canvas not found");
+    }
+    if (canvas.owner.toString() === userId) {
+      // user is the owner, delete the canvas
+      const result = await this.deleteOne({
+        _id: canvasId,
+        owner: userId, // only owner can delete the canvas
+      });
+      return result.deletedCount > 0; // return true if a canvas was deleted
+    } else {
+      // user is not the owner, remove him from sharedWith array
+      const result = await this.updateOne(
+        { _id: canvasId },
+        { $pull: { sharedWith: userId } }
+      );
+      return result.modifiedCount > 0; // return true if the user was removed from sharedWith array
+    }
   } catch (error) {
     throw new ApiError(
       error.statusCode || 500,

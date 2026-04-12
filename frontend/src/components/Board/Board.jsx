@@ -69,13 +69,43 @@ const Board = () => {
 
     const socket = io("http://localhost:3030", {
       withCredentials: true,
+      autoConnect: false,
     });
 
     socketRef.current = socket;
 
-    socket.emit("joinCanvas", id); // joins room
+    let isRefreshingSocketAuth = false;
+    let isMounted = true;
 
-    return () => socket.disconnect();
+    socket.on("connect", () => {
+      socket.emit("joinCanvas", id);
+    });
+
+    socket.on("connect_error", async (err) => {
+      if (!isMounted) return;
+      if (err?.message !== "AccessTokenExpired" || isRefreshingSocketAuth) {
+        return;
+      }
+
+      isRefreshingSocketAuth = true;
+      try {
+        await api.post("/user/refresh-token");
+        if (isMounted) socket.connect();
+      } catch (_) {
+        // refresh interceptor already redirects to landing when needed
+      } finally {
+        isRefreshingSocketAuth = false;
+      }
+    });
+
+    socket.connect();
+
+    return () => {
+      isMounted = false;
+      socket.off("connect");
+      socket.off("connect_error");
+      socket.disconnect();
+    };
   }, [id]);
 
   // when i draw on canvas, emmit event with new elements
@@ -90,7 +120,6 @@ const Board = () => {
 
     socketRef.current.emit("draw", {
       canvasId: id,
-      senderId: socketRef.current.id,
       elements: safeElements,
     });
   }, [safeElements, id, isLoaded]);
@@ -159,8 +188,8 @@ const Board = () => {
     if (!socketRef.current) return;
 
     const handler = (data) => {
-      const { senderId, elements } = data;
-      if (senderId === socketRef.current.id) return; // ignore own events
+      const { senderSocketId, elements } = data;
+      if (senderSocketId === socketRef.current.id) return; // ignore own events
 
       isRemoteUpdateRef.current = true;
       // Remote updates should not trigger autosave on this client.

@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Board from "../Board/Board";
 import Toolbar from "../Toolbar/Toolbar";
 import Toolbox from "../Toolbox/Toolbox";
-import Sidebar from "../Siderbar/Siderbar";
+import Sidebar from "../Siderbar/Sidebar";
 import { BoardContext } from "../../store/BoardContext";
 
 function Dashboard() {

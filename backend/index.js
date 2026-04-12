@@ -7,6 +7,9 @@ import userRoutes from "./src/routes/user.route.js";
 import canvasRoutes from "./src/routes/canvas.route.js";
 import http from "http";
 import { Server } from "socket.io";
+import jwt from "jsonwebtoken";
+import User from "./src/models/user.model.js";
+import Canvas from "./src/models/canvas.model.js";
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT;
@@ -34,17 +37,74 @@ const io = new Server(server, {
   },
 });
 
+const parseCookies = (cookieHeader = "") => {
+  return cookieHeader.split(";").reduce((acc, cookiePart) => {
+    const [rawKey, ...rawValue] = cookiePart.trim().split("=");
+    if (!rawKey) return acc;
+    acc[rawKey] = decodeURIComponent(rawValue.join("="));
+    return acc;
+  }, {});
+};
+
+io.use(async (socket, next) => {
+  try {
+    const cookieHeader = socket.handshake.headers?.cookie || "";
+    const cookies = parseCookies(cookieHeader);
+    const token = cookies.accessToken;
+
+    if (!token) {
+      return next(new Error("NoAccessToken"));
+    }
+
+    let decoded;
+    try {
+      decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+    } catch (error) {
+      if (error.name === "TokenExpiredError") {
+        return next(new Error("AccessTokenExpired"));
+      }
+      return next(new Error("InvalidAccessToken"));
+    }
+
+    const user = await User.findById(decoded._id).select("_id username email");
+    if (!user) {
+      return next(new Error("InvalidUser"));
+    }
+
+    socket.user = user;
+    next();
+  } catch (_) {
+    next(new Error("Unauthorized"));
+  }
+});
+
 io.on("connection", (socket) => {
-  console.log("User connected:", socket.id);
+  console.log("User connected:", socket.id, socket.user?.email);
 
   // join room
-  socket.on("joinCanvas", (canvasId) => {
+  socket.on("joinCanvas", async (canvasId) => {
+    const hasAccess = await Canvas.findOne({
+      _id: canvasId,
+      $or: [{ owner: socket.user._id }, { sharedWith: socket.user._id }],
+    }).select("_id");
+
+    if (!hasAccess) {
+      socket.emit("canvas:error", {
+        message: "Canvas not found or access denied",
+      });
+      return;
+    }
+
     socket.join(canvasId);
   });
 
   // receive drawing and broadcast
-  socket.on("draw", ({ canvasId, senderId, elements }) => {
-    socket.to(canvasId).emit("draw", { senderId, elements });
+  socket.on("draw", ({ canvasId, elements }) => {
+    socket.to(canvasId).emit("draw", {
+      senderSocketId: socket.id,
+      senderUserId: socket.user?._id?.toString(),
+      elements,
+    });
   });
 
   socket.on("disconnect", () => {

@@ -5,7 +5,7 @@ import api from "../../Api";
 import { BoardContext } from "../../store/BoardContext";
 import { toast } from "react-toastify";
 
-function Siderbar() {
+function Sidebar() {
   const navigate = useNavigate();
 
   const {
@@ -158,14 +158,15 @@ function Siderbar() {
       // SHARE
       if (modalType === "share") {
         if (!inputValue.trim()) return;
-        console.log("Sharing canvas", selectedId, "with", inputValue.trim());
+        // console.log("Sharing canvas", selectedId, "with", inputValue.trim());
         const res = await api.put("/canvases/share", {
           canvasId: selectedId,
           email: inputValue.trim(),
         });
-        console.log("Share response:", res);
+        // console.log("Share response:", res);
         if (!res?.data?.success) {
-          toast.error("Failed to share canvas");
+          // console.log("Failed to share canvas:", res?.data);
+          toast.error(res?.data?.message || "Failed to share canvas");
           return;
         }
 
@@ -177,7 +178,10 @@ function Siderbar() {
         setSelectedId(null);
       }
     } catch (err) {
-      toast.error(err?.message || "Action failed");
+      // console.error("Action failed:", err);
+      toast.error(
+        err?.response?.data?.message || err?.message || "Action failed",
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -251,16 +255,15 @@ function Siderbar() {
                         >
                           Open
                         </button>
-
+                        <button
+                          className={styles.deleteBtn}
+                          onClick={() => handleDeleteCanvas(canvas.id)}
+                          disabled={isSubmitting}
+                        >
+                          Delete
+                        </button>
                         {canvas.createdBy === profile?.username && (
                           <>
-                            <button
-                              className={styles.deleteBtn}
-                              onClick={() => handleDeleteCanvas(canvas.id)}
-                              disabled={isSubmitting}
-                            >
-                              Delete
-                            </button>
                             <button
                               className={styles.shareBtn}
                               onClick={() => handleShareCanvas(canvas.id)}
@@ -329,4 +332,4 @@ function Siderbar() {
   );
 }
 
-export default Siderbar;
+export default Sidebar;
