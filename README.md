@@ -1,93 +1,114 @@
-# White Board App
+# 🎨 White Board App
 
-A React-based whiteboard application for freehand drawing, shapes, text, erasing, undo/redo, and image export.
+A real-time collaborative whiteboard built with modern web technologies.  
+Draw, write, share canvases, and collaborate live.
 
-## Features
+---
 
-- Draw with **Pen**
-- Create **Line, Rectangle, Circle, Arrow**
-- Add **Text** on canvas
-- **Eraser** support (including pen strokes)
-- **Stroke color**, **Fill color**, and **Size** controls
-- **Undo / Redo** with history tracking
-- Download canvas as **PNG**
+## ✨ Highlights
 
-## Tech Stack
+- 🖊️ Multiple drawing tools (pen, line, rectangle, circle, arrow, text, eraser)
+- 👥 Real-time collaboration with Socket.IO
+- 🔐 JWT-based authentication with refresh-token flow
+- 💾 Auto-save canvas state to database
+- 📤 Canvas sharing and persistence by canvas ID
+- ↩️ Undo / Redo support
+- 📱 Smooth pointer interactions and responsive canvas rendering
 
-- **React**
+---
+
+## 🧱 Tech Stack
+
+### Frontend
+- **React (Vite)**
 - **Context API + useReducer** (state management)
-- **HTML5 Canvas API**
-- **Rough.js** (hand-drawn style shapes)
-- **CSS Modules**
+- **Socket.IO Client** (live sync)
+- **Rough.js** (hand-drawn style primitives)
+- **Perfect Freehand** (smooth pen strokes)
+- **CSS Modules + Tailwind CSS**
 
-## Project Structure
+### Backend
+- **Node.js + Express**
+- **MongoDB + Mongoose**
+- **Socket.IO Server**
+- **JWT Authentication** (access + refresh tokens)
+- **Cookie-based auth middleware**
 
-```text
-src/
-  components/
-    Board/
-    Toolbar/
-    Toolbox/
-    ui/
-  store/
-    BoardContext.jsx
-    ToolboxContext.jsx
-  utils/
-    Element.js
-    Math.js
-    svgPathFromStroke.js
-  Constants.js
-  App.jsx
-  main.jsx
-```
+---
 
-## Getting Started
+## 📂 Project Structure
 
-### 1) Clone the repository
+- `frontend/` → React app (UI, canvas engine, sockets, auth flows)
+- `backend/` → Express API (auth, canvas APIs, DB, socket integration)
 
+---
+
+## 🚀 Getting Started
+
+### 1) Clone repository
 ```bash
 git clone <your-repo-url>
 cd "White Board App"
 ```
 
-### 2) Install dependencies
-
+### 2) Run backend
 ```bash
+cd backend
 npm install
-```
-
-### 3) Run development server
-
-```bash
 npm run dev
 ```
 
-### 4) Build for production
-
+### 3) Run frontend
+Open a new terminal:
 ```bash
-npm run build
+cd frontend
+npm install
+npm run dev
 ```
 
-### 5) Preview production build
+Frontend usually runs on `http://localhost:5173` (Vite default).
 
-```bash
-npm run preview
+---
+
+## 🔐 Environment Variables (Backend)
+
+Create `backend/.env` with your values:
+```env
+PORT=8000
+MONGODB_URI=your_mongodb_connection_string
+ACCESS_TOKEN_SECRET=your_access_secret
+REFRESH_TOKEN_SECRET=your_refresh_secret
+ACCESS_TOKEN_EXPIRY=15m
+REFRESH_TOKEN_EXPIRY=7d
+CORS_ORIGIN=http://localhost:5173
 ```
 
-## Usage
+---
 
-- Select a tool from the toolbar.
-- Customize stroke/fill/size from toolbox.
-- Draw on canvas using mouse or trackpad.
-- Use undo/redo for history navigation.
-- Download the board as an image.
+## 📌 Core Modules
 
-## Notes
+- `frontend/src/components/Board/Board.jsx` → drawing, autosave, realtime sync
+- `frontend/src/store/BoardContext.jsx` → board actions and state
+- `frontend/src/utils/Element.js` → element creation/hydration logic
+- `backend/src/controllers/canvas.controller.js` → canvas CRUD/share APIs
+- `backend/src/controllers/user.controller.js` → authentication flows
+- `backend/index.js` → server bootstrap + socket setup
 
-- Text tool enters writing mode on click.
-- Eraser uses near-element hit detection for all supported element types.
-- Download export preserves canvas background by rendering to an export canvas first.
+---
 
-## License
+## 🛠️ Scripts
 
-This project is for learning and personal development use.
+### Frontend
+- `npm run dev` → start dev server
+- `npm run build` → production build
+- `npm run preview` → preview build
+
+### Backend
+- `npm run dev` → start backend in development
+- `npm start` → start backend in production mode
+
+---
+
+## 📄 License
+
+MIT (recommended). Update this section based on your preference.
