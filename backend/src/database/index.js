@@ -1,17 +1,18 @@
 import mongoose from "mongoose";
-import { DB_NAME } from "../constants.js";
-
-// database connection
 
 const connectDB = async () => {
   try {
-    const connectionInstance = await mongoose.connect(
-      `${process.env.MONGODB_URL}`,
-    );
+    const uri =
+      typeof Deno !== "undefined"
+        ? Deno.env.get("MONGODB_URL")
+        : process.env.MONGODB_URL;
+
+    console.log("URI defined:", !!uri);
+
+    const connectionInstance = await mongoose.connect(uri);
     console.log(
-      `\nMongoDB connected !! BD Host: ${connectionInstance.connection.host}`,
+      `MongoDB connected !! DB Host: ${connectionInstance.connection.host}`,
     );
-    console.log("MongoDB connected successfully");
   } catch (error) {
     console.log("MongoDB Connection Failed: ", error);
     process.exit(1);
