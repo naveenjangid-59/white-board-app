@@ -5,7 +5,7 @@ import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import userRoutes from "./src/routes/user.route.js";
 import canvasRoutes from "./src/routes/canvas.route.js";
-import http from "http";
+import http from "node:http";
 import { Server } from "socket.io";
 import jwt from "jsonwebtoken";
 import User from "./src/models/user.model.js";
